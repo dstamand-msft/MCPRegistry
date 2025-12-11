@@ -125,6 +125,11 @@ public class ServerRegistryService : IServerRegistryService
         return Task.FromResult(true);
     }
 
+    public Task AddServerAsync(ServerDetail server)
+    {
+        throw new NotImplementedException();
+    }
+
     private void SeedSampleData()
     {
         var filesystemServer = new ServerResponse

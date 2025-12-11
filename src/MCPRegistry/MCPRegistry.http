@@ -66,3 +66,9 @@ GET {{MCPRegistry_HostAddress}}/v0.1/servers/non.existent%2Fserver/versions/1.0.
 Accept: application/json
 
 ###
+
+### Add new servers (example payload), use only with VSCode REST Client extension
+POST {{MCPRegistry_HostAddress}}/v0.1/servers
+Content-Type: application/json
+
+< ../../data/sample-seed-data.json

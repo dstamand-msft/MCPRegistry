@@ -16,4 +16,5 @@ public interface IServerRegistryService
     Task<ServerResponse?> GetServerVersionAsync(string serverName, string version);
 
     Task<bool> DeleteServerVersionAsync(string serverName, string version);
+    Task AddServerAsync(ServerDetail server);
 }

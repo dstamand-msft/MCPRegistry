@@ -1,0 +1,169 @@
+[
+  {
+    "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+    "name": "com.microsoft/azure",
+    "description": "All Azure MCP tools to create a seamless connection between AI agents and Azure services.",
+    "title": "Azure MCP Server",
+    "repository": {
+      "url": "https://github.com/microsoft/mcp",
+      "source": "github",
+      "subfolder": "servers/Azure.Mcp.Server"
+    },
+    "version": "2.0.0-beta.7",
+    "websiteUrl": "https://azure.microsoft.com/",
+    "packages": [
+      {
+        "registryType": "npm",
+        "registryBaseUrl": "https://registry.npmjs.org",
+        "identifier": "@azure/mcp",
+        "version": "2.0.0-beta.7",
+        "transport": {
+          "$transport-type": "stdio",
+          "type": "stdio"
+        },
+        "packageArguments": [
+          {
+            "value": "server",
+            "type": "positional"
+          },
+          {
+            "value": "start",
+            "type": "positional"
+          }
+        ]
+      },
+      {
+        "registryType": "nuget",
+        "identifier": "Azure.Mcp",
+        "version": "2.0.0-beta.7",
+        "transport": {
+          "$transport-type": "stdio",
+          "type": "stdio"
+        },
+        "packageArguments": [
+          {
+            "value": "server",
+            "type": "positional"
+          },
+          {
+            "value": "start",
+            "type": "positional"
+          }
+        ]
+      }
+    ],
+    "_meta": {
+      "io.modelcontextprotocol.registry/official": {
+        "status": "active",
+        "publishedAt": "2025-11-24T16:17:02.938828Z",
+        "updatedAt": "2025-11-24T16:17:02.938828Z",
+        "isLatest": true
+      }
+    }
+  },
+  {
+    "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+    "name": "com.microsoft/azure-devops-mcp",
+    "title": "Azure DevOps MCP Server",
+    "description": "Azure DevOps—work items, repositories, pipelines, test plans, wiki, search, and more.",
+    "websiteUrl": "https://github.com/microsoft/azure-devops-mcp",
+    "repository": {
+      "url": "https://github.com/microsoft/azure-devops-mcp",
+      "source": "github"
+    },
+    "version": "2.2.2",
+    "packages": [
+      {
+        "registryType": "npm",
+        "registryBaseUrl": "https://registry.npmjs.org",
+        "identifier": "@azure-devops/mcp",
+        "version": "2.2.2",
+        "runtimeHint": "npx",
+        "transport": {
+          "$transport-type": "stdio",
+          "type": "stdio"
+        },
+        "packageArguments": [
+          {
+            "type": "positional",
+            "valueHint": "organization",
+            "description": "Azure DevOps organization name (e.g., 'contoso')",
+            "isRequired": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+    "name": "com.microsoft/microsoft-learn-mcp",
+    "description": "Official Microsoft Learn MCP Server – real-time, trusted docs & code samples for AI and LLMs.",
+    "title": "Microsoft Learn MCP",
+    "repository": {
+      "url": "https://github.com/MicrosoftDocs/mcp",
+      "source": "github"
+    },
+    "version": "1.0.0",
+    "websiteUrl": "https://github.com/MicrosoftDocs/mcp",
+    "remotes": [
+      {
+        "$transport-type": "streamable-http",
+        "type": "streamable-http",
+        "url": "https://learn.microsoft.com/api/mcp"
+      }
+    ],
+    "_meta": {
+      "io.modelcontextprotocol.registry/official": {
+        "status": "active",
+        "publishedAt": "2025-11-21T06:16:59.721831Z",
+        "updatedAt": "2025-11-21T06:16:59.721831Z",
+        "isLatest": true
+      }
+    }
+  },
+  {
+    "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+    "name": "com.atlassian/atlassian-mcp-server",
+    "description": "Connect to Jira and Confluence for issue tracking and documentation.",
+    "version": "1.0.0",
+    "remotes": [
+      {
+        "$transport-type": "sse",
+        "type": "sse",
+        "url": "https://mcp.atlassian.com/v1/sse"
+      }
+    ],
+    "_meta": {
+      "io.modelcontextprotocol.registry/official": {
+        "status": "active",
+        "createdAt": "2025-11-21T10:58:13.1934455+00:00",
+        "updatedAt": "2025-11-21T10:58:18.6788839+00:00",
+        "isLatest": true
+      }
+    }
+  },
+  {
+    "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+    "name": "io.github.github/github-mcp-server",
+    "version": "1.0.0",
+    "description": "Official GitHub Remote MCP Server offering the default toolset for GitHub integrations.",
+    "websiteUrl": "https://github.com/github/github-mcp-server",
+    "repository": {
+      "url": "https://github.com/github/github-mcp-server",
+      "source": "github"
+    },
+    "remotes": [
+      {
+        "$transport-type": "streamable-http",
+        "type": "streamable-http",
+        "url": "https://api.githubcopilot.com/mcp/"
+      }
+    ],
+    "_meta": {
+      "io.modelcontextprotocol.registry/publisher-provided": {
+        "hostedBy": "GitHub",
+        "docUrl": "https://raw.githubusercontent.com/github/github-mcp-server/main/docs/remote-server.md"
+      }
+    }
+  }
+]

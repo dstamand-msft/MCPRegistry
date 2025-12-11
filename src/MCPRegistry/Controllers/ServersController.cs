@@ -1,7 +1,8 @@
-using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Mvc;
 using MCPRegistry.Models;
 using MCPRegistry.Services;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Text.RegularExpressions;
 
 namespace MCPRegistry.Controllers;
 
@@ -175,7 +176,7 @@ public class ServersController : ControllerBase
     [ProducesResponseType(typeof(ServerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> DeleteServerVersion(string serverName, string version)
+    public async Task<IActionResult> DeleteServerVersion(string serverName, string version)
     {
         try
         {
@@ -200,6 +201,32 @@ public class ServersController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting server version {ServerName}@{Version}", serverName, version);
+            return Problem("Failed to delete server version", statusCode: StatusCodes.Status500InternalServerError, title: "Internal server error");
+        }
+    }
+
+    [HttpPost]
+    [ProducesResponseType(typeof(void), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> AddServer(List<ServerDetail> servers)
+    {
+        try
+        {
+            if (servers.Count == 0)
+            {
+                return BadRequest("No servers provided");
+            }
+
+            foreach (var server in servers)
+            {
+                await _registryService.AddServerAsync(server);
+            }
+
+            return Created();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding server");
             return Problem("Failed to delete server version", statusCode: StatusCodes.Status500InternalServerError, title: "Internal server error");
         }
     }
