@@ -9,7 +9,7 @@ public class ServerDetail
     [Required]
     [MinLength(3)]
     [MaxLength(200)]
-    [RegularExpression(@"^[a-zA-Z0-9.-]+/[a-zA-Z0-9._-]+$")]
+    [RegularExpression("^[a-zA-Z0-9.-]+/[a-zA-Z0-9._-]+$")]
     public required string Name { get; set; }
 
     [JsonPropertyName("description")]
@@ -39,8 +39,7 @@ public class ServerDetail
 
     [JsonPropertyName("$schema")]
     [JsonPropertyOrder(-1)]
-    public string? Schema { get; set; } =
-        "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json";
+    public string? Schema { get; set; } = "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json";
 
     [JsonPropertyName("packages")]
     public List<Package>? Packages { get; set; }

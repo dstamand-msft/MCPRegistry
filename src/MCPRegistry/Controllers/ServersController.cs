@@ -1,8 +1,6 @@
 using MCPRegistry.Models;
 using MCPRegistry.Services;
-using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Text.RegularExpressions;
 
 namespace MCPRegistry.Controllers;
