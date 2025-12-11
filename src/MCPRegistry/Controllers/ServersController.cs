@@ -1,5 +1,6 @@
 using MCPRegistry.Models;
 using MCPRegistry.Services;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Text.RegularExpressions;
@@ -204,7 +205,37 @@ public class ServersController : ControllerBase
             return Problem("Failed to delete server version", statusCode: StatusCodes.Status500InternalServerError, title: "Internal server error");
         }
     }
+    
+    /// <summary>
+    /// Adds a new server to the registry.
+    /// </summary>
+    /// <param name="server">The details of the server to add. Cannot be null.</param>
+    /// <returns>A 201 Created response if the server is added successfully; otherwise, a 500 Internal Server Error response with
+    /// problem details.</returns>
+    [HttpPost]
+    [ProducesResponseType(typeof(void), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> AddServer(ServerDetail server)
+    {
+        try
+        {
+            await _registryService.AddServerAsync(server);
 
+            return Created();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding server");
+            return Problem("Failed to delete server version", statusCode: StatusCodes.Status500InternalServerError, title: "Internal server error");
+        }
+    }
+
+    /// <summary>
+    /// Adds one or more servers to the registry.   
+    /// </summary>
+    /// <param name="servers">A list of server details to add. The list must contain at least one item.</param>
+    /// <returns>A 201 Created response if the servers are added successfully; otherwise, a problem response with details of the
+    /// error.</returns>
     [HttpPost]
     [ProducesResponseType(typeof(void), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
