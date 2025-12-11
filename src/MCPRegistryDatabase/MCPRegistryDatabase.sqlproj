@@ -11,17 +11,19 @@
     <OutputType>Database</OutputType>
     <RootPath>
     </RootPath>
-    <RootNamespace>MCPRegistry2</RootNamespace>
-    <AssemblyName>MCPRegistry2</AssemblyName>
+    <RootNamespace>MCPRegistryDatabase</RootNamespace>
+    <AssemblyName>MCPRegistryDatabase</AssemblyName>
     <ModelCollation>1033, CI</ModelCollation>
     <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
     <DeployToDatabase>True</DeployToDatabase>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
     <TargetLanguage>CS</TargetLanguage>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <SqlServerVerification>False</SqlServerVerification>
     <IncludeCompositeObjects>True</IncludeCompositeObjects>
     <TargetDatabaseSet>True</TargetDatabaseSet>
+    <IncludeSchemaNameInFileName>True</IncludeSchemaNameInFileName>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -56,5 +58,25 @@
   <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>
     <Folder Include="Properties" />
+    <Folder Include="Tables" />
+    <Folder Include="StoredProcedures" />
+    <Folder Include="PreDeployment" />
+    <Folder Include="Data" />
+    <Folder Include="PostDeployment" />
+    <Folder Include="Triggers" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
+    <None Include="StoredProcedures\README.md" />
+    <None Include="PreDeployment\README.md" />
+    <None Include="Data\README.md" />
+    <None Include="PostDeployment\README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Tables\dbo.Servers.sql" />
+    <Build Include="Triggers\dbo.TRG_Servers_UpdateUpdatedAt.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="MCPRegistryDatabase.refactorlog" />
   </ItemGroup>
 </Project>

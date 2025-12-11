@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
   <Project Path="src/MCPRegistry/MCPRegistry.csproj" />
   <Project Path="src/MCPRegistryDatabase/MCPRegistryDatabase.sqlproj" Id="1d65a068-8c9c-4c77-a6dc-0dfeb32d1b00">
     <Build />
