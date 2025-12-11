@@ -1,0 +1,68 @@
+#@MCPRegistry_HostAddress = http://localhost:8080
+@MCPRegistry_HostAddress = https://localhost:7160
+
+### List all servers
+GET {{MCPRegistry_HostAddress}}/v0.1/servers
+Accept: application/json
+
+###
+
+### List servers with pagination
+GET {{MCPRegistry_HostAddress}}/v0.1/servers?limit=10
+Accept: application/json
+
+###
+
+### List servers with search
+GET {{MCPRegistry_HostAddress}}/v0.1/servers?search=filesystem
+Accept: application/json
+
+###
+
+### List servers filtered by version
+GET {{MCPRegistry_HostAddress}}/v0.1/servers?version=latest
+Accept: application/json
+
+###
+
+### List servers updated since a specific date
+GET {{MCPRegistry_HostAddress}}/v0.1/servers?updated_since=2024-12-01T00:00:00Z
+Accept: application/json
+
+###
+
+### List all versions of a specific server
+GET {{MCPRegistry_HostAddress}}/v0.1/servers/io.modelcontextprotocol%2Ffilesystem/versions
+Accept: application/json
+
+###
+
+### Get specific version of a server
+GET {{MCPRegistry_HostAddress}}/v0.1/servers/io.modelcontextprotocol%2Ffilesystem/versions/1.0.2
+Accept: application/json
+
+###
+
+### Get latest version of a server
+GET {{MCPRegistry_HostAddress}}/v0.1/servers/io.modelcontextprotocol%2Ffilesystem/versions/latest
+Accept: application/json
+
+###
+
+### Get specific version of Brave Search server
+GET {{MCPRegistry_HostAddress}}/v0.1/servers/io.modelcontextprotocol%2Fbrave-search/versions/0.1.0
+Accept: application/json
+
+###
+
+### Delete a specific version (optional endpoint)
+DELETE {{MCPRegistry_HostAddress}}/v0.1/servers/io.modelcontextprotocol%2Ffilesystem/versions/1.0.1
+Accept: application/json
+
+###
+
+### Try to get a non-existent server (should return 404)
+GET {{MCPRegistry_HostAddress}}/v0.1/servers/non.existent%2Fserver/versions/1.0.0
+Accept: application/json
+
+###
