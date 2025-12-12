@@ -7,14 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.35" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Functions\" />
-    <Folder Include="StoredProcedures\" />
-    <Folder Include="Tables\" />
-    <Folder Include="Views\" />
-  </ItemGroup>
+	<ItemGroup>
+		<Content Update="appsettings.*.json" CopyToPublishDirectory="Never" />
+	</ItemGroup>
 
 </Project>

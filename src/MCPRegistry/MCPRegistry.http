@@ -8,13 +8,19 @@ Accept: application/json
 ###
 
 ### List servers with pagination
-GET {{MCPRegistry_HostAddress}}/v0.1/servers?limit=10
+GET {{MCPRegistry_HostAddress}}/v0.1/servers?limit=2
 Accept: application/json
 
 ###
 
 ### List servers with search
-GET {{MCPRegistry_HostAddress}}/v0.1/servers?search=filesystem
+GET {{MCPRegistry_HostAddress}}/v0.1/servers?search=com.microsoft%2Fazure
+Accept: application/json
+
+###
+
+### List servers with search & next cursor
+GET {{MCPRegistry_HostAddress}}/v0.1/servers?search=com.microsoft%2Fazure&cursor=com.microsoft%2Fazure:2.0.0-beta.6
 Accept: application/json
 
 ###
@@ -26,37 +32,31 @@ Accept: application/json
 ###
 
 ### List servers updated since a specific date
-GET {{MCPRegistry_HostAddress}}/v0.1/servers?updated_since=2024-12-01T00:00:00Z
+GET {{MCPRegistry_HostAddress}}/v0.1/servers?updated_since=2025-12-12T00:00:00Z
 Accept: application/json
 
 ###
 
 ### List all versions of a specific server
-GET {{MCPRegistry_HostAddress}}/v0.1/servers/io.modelcontextprotocol%2Ffilesystem/versions
+GET {{MCPRegistry_HostAddress}}/v0.1/servers/com.microsoft%2Fazure/versions
 Accept: application/json
 
 ###
 
 ### Get specific version of a server
-GET {{MCPRegistry_HostAddress}}/v0.1/servers/io.modelcontextprotocol%2Ffilesystem/versions/1.0.2
+GET {{MCPRegistry_HostAddress}}/v0.1/servers/com.microsoft%2Fazure/versions/2.0.0-beta.6
 Accept: application/json
 
 ###
 
 ### Get latest version of a server
-GET {{MCPRegistry_HostAddress}}/v0.1/servers/io.modelcontextprotocol%2Ffilesystem/versions/latest
-Accept: application/json
-
-###
-
-### Get specific version of Brave Search server
-GET {{MCPRegistry_HostAddress}}/v0.1/servers/io.modelcontextprotocol%2Fbrave-search/versions/0.1.0
+GET {{MCPRegistry_HostAddress}}/v0.1/servers/com.microsoft%2Fazure/latest
 Accept: application/json
 
 ###
 
 ### Delete a specific version (optional endpoint)
-DELETE {{MCPRegistry_HostAddress}}/v0.1/servers/io.modelcontextprotocol%2Ffilesystem/versions/1.0.1
+DELETE {{MCPRegistry_HostAddress}}/v0.1/servers/com.microsoft%2Fazure/1.0.2
 Accept: application/json
 
 ###
@@ -72,3 +72,12 @@ POST {{MCPRegistry_HostAddress}}/v0.1/servers
 Content-Type: application/json
 
 < ../../data/sample-seed-data.json
+
+###
+
+### Add new server version, use only with VSCode REST Client extension
+
+POST {{MCPRegistry_HostAddress}}/v0.1/servers
+Content-Type: application/json
+
+< ../../data/new-version-data.json

@@ -51,15 +51,7 @@
           }
         ]
       }
-    ],
-    "_meta": {
-      "io.modelcontextprotocol.registry/official": {
-        "status": "active",
-        "publishedAt": "2025-11-24T16:17:02.938828Z",
-        "updatedAt": "2025-11-24T16:17:02.938828Z",
-        "isLatest": true
-      }
-    }
+    ]
   },
   {
     "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
@@ -111,15 +103,7 @@
         "type": "streamable-http",
         "url": "https://learn.microsoft.com/api/mcp"
       }
-    ],
-    "_meta": {
-      "io.modelcontextprotocol.registry/official": {
-        "status": "active",
-        "publishedAt": "2025-11-21T06:16:59.721831Z",
-        "updatedAt": "2025-11-21T06:16:59.721831Z",
-        "isLatest": true
-      }
-    }
+    ]
   },
   {
     "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
@@ -132,15 +116,7 @@
         "type": "sse",
         "url": "https://mcp.atlassian.com/v1/sse"
       }
-    ],
-    "_meta": {
-      "io.modelcontextprotocol.registry/official": {
-        "status": "active",
-        "createdAt": "2025-11-21T10:58:13.1934455+00:00",
-        "updatedAt": "2025-11-21T10:58:18.6788839+00:00",
-        "isLatest": true
-      }
-    }
+    ]
   },
   {
     "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
@@ -158,12 +134,6 @@
         "type": "streamable-http",
         "url": "https://api.githubcopilot.com/mcp/"
       }
-    ],
-    "_meta": {
-      "io.modelcontextprotocol.registry/publisher-provided": {
-        "hostedBy": "GitHub",
-        "docUrl": "https://raw.githubusercontent.com/github/github-mcp-server/main/docs/remote-server.md"
-      }
-    }
+    ]
   }
 ]

@@ -64,16 +64,16 @@ public class ServersController : ControllerBase
 
         try
         {
-            var (servers, nextCursor, count) = await _registryService.GetServersAsync(
+            var (servers, nextCursor) = await _registryService.GetServersAsync(
                 cursor, limit, search, updated_since, version);
 
             var response = new ServerList
             {
-                Servers = servers,
+                Servers = servers.Select(server => new ServerResponse { Server = server }).ToList(),
                 Metadata = new ServerListMetadata
                 {
                     NextCursor = nextCursor,
-                    Count = count
+                    Count = servers.Count
                 }
             };
 
@@ -106,7 +106,7 @@ public class ServersController : ControllerBase
         try
         {
             var decodedServerName = Uri.UnescapeDataString(serverName);
-            var (versions, count) = await _registryService.GetServerVersionsAsync(decodedServerName);
+            var versions = await _registryService.GetServerVersionsAsync(decodedServerName);
 
             if (versions.Count == 0)
             {
@@ -115,10 +115,10 @@ public class ServersController : ControllerBase
 
             var response = new ServerList
             {
-                Servers = versions,
+                Servers = versions.Select(server => new ServerResponse{Server = server }).ToList(),
                 Metadata = new ServerListMetadata
                 {
-                    Count = count
+                    Count = versions.Count
                 }
             };
 
@@ -203,30 +203,6 @@ public class ServersController : ControllerBase
             return Problem("Failed to delete server version", statusCode: StatusCodes.Status500InternalServerError, title: "Internal server error");
         }
     }
-    
-    /// <summary>
-    /// Adds a new server to the registry.
-    /// </summary>
-    /// <param name="server">The details of the server to add. Cannot be null.</param>
-    /// <returns>A 201 Created response if the server is added successfully; otherwise, a 500 Internal Server Error response with
-    /// problem details.</returns>
-    [HttpPost]
-    [ProducesResponseType(typeof(void), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> AddServer(ServerDetail server)
-    {
-        try
-        {
-            await _registryService.AddServerAsync(server);
-
-            return Created();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding server");
-            return Problem("Failed to delete server version", statusCode: StatusCodes.Status500InternalServerError, title: "Internal server error");
-        }
-    }
 
     /// <summary>
     /// Adds one or more servers to the registry.   
@@ -237,7 +213,7 @@ public class ServersController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(void), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> AddServer(List<ServerDetail> servers)
+    public async Task<IActionResult> AddServers(List<ServerDetail> servers)
     {
         try
         {
@@ -256,7 +232,7 @@ public class ServersController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error adding server");
-            return Problem("Failed to delete server version", statusCode: StatusCodes.Status500InternalServerError, title: "Internal server error");
+            return Problem("Failed to insert servers", statusCode: StatusCodes.Status500InternalServerError, title: "Internal server error");
         }
     }
 }

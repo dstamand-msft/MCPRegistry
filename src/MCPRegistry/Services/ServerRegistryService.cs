@@ -1,252 +1,74 @@
+using MCPRegistry.Data;
 using MCPRegistry.Models;
-using System.Collections.Concurrent;
 
 namespace MCPRegistry.Services;
 
 public class ServerRegistryService : IServerRegistryService
 {
-    private readonly ConcurrentDictionary<string, List<ServerResponse>> _servers = new();
+    private readonly IServerRepository _repository;
 
-    public ServerRegistryService()
+    public ServerRegistryService(IServerRepository repository)
     {
-        SeedSampleData();
+        _repository = repository;
     }
 
-    public Task<(List<ServerResponse> servers, string? nextCursor, int count)> GetServersAsync(
+    public async Task<(List<ServerDetail> servers, string? nextCursor)> GetServersAsync(
         string? cursor,
         int? limit,
         string? search,
         DateTime? updatedSince,
         string? version)
     {
-        var allServers = _servers.Values.SelectMany(v => v).ToList();
+        string? cursorServerName = null;
+        string? cursorVersion = null;
 
-        if (!string.IsNullOrEmpty(search))
+        // Parse composite cursor of format "serverName:version"
+        // Fallback for malformed cursor: treat entire value as server name only
+        if (!string.IsNullOrEmpty(cursor))
         {
-            allServers = allServers.Where(s =>
-                s.Server.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                (s.Server.Title?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                s.Server.Description.Contains(search, StringComparison.OrdinalIgnoreCase)
-            ).ToList();
-        }
-
-        if (updatedSince.HasValue)
-        {
-            allServers = allServers.Where(s => s.Meta.Official?.UpdatedAt >= updatedSince.Value).ToList();
-        }
-
-        if (!string.IsNullOrEmpty(version))
-        {
-            allServers = version == "latest"
-                ? allServers.Where(s => s.Meta.Official?.IsLatest == true).ToList()
-                : allServers.Where(s => s.Server.Version == version).ToList();
-        }
-
-        allServers = allServers
-            .OrderByDescending(s => s.Meta.Official?.UpdatedAt ?? DateTime.MinValue)
-            .ToList();
-
-        var skip = 0;
-        if (!string.IsNullOrEmpty(cursor) && int.TryParse(cursor, out var cursorValue))
-        {
-            skip = cursorValue;
+            var parts = cursor.Split(':');
+            if (parts.Length == 2 && !string.IsNullOrWhiteSpace(parts[0]) && !string.IsNullOrWhiteSpace(parts[1]))
+            {
+                cursorServerName = parts[0];
+                cursorVersion = parts[1];
+            }
+            else
+            {
+                cursorServerName = cursor;
+            }
         }
 
         var pageSize = limit ?? 30;
-        var pagedServers = allServers.Skip(skip).Take(pageSize).ToList();
-        var hasMore = allServers.Count > skip + pageSize;
-        var nextCursor = hasMore ? (skip + pageSize).ToString() : null;
 
-        return Task.FromResult((pagedServers, nextCursor, pagedServers.Count));
+        var servers = await _repository.GetServersAsync(cursorServerName, cursorVersion, pageSize, search, updatedSince, version);
+
+        // Compute nextCursor: if we filled the page, use last item's serverName:version
+        var nextCursor = servers.Count == pageSize
+            ? $"{servers[^1].Name}:{servers[^1].Version}"
+            : null;
+
+        return (servers, nextCursor);
     }
 
-    public Task<(List<ServerResponse> versions, int count)> GetServerVersionsAsync(string serverName)
+    public async Task<List<ServerDetail>> GetServerVersionsAsync(string serverName)
     {
-        if (_servers.TryGetValue(serverName, out var versions))
-        {
-            var sortedVersions = versions
-                .OrderByDescending(v => v.Meta.Official?.PublishedAt ?? DateTime.MinValue)
-                .ToList();
-
-            return Task.FromResult((sortedVersions, sortedVersions.Count));
-        }
-
-        return Task.FromResult((new List<ServerResponse>(), 0));
+        var versions = await _repository.GetServerVersionsAsync(serverName);
+        return versions;
     }
 
-    public Task<ServerResponse?> GetServerVersionAsync(string serverName, string version)
+    public async Task<ServerDetail?> GetServerVersionAsync(string serverName, string version)
     {
-        if (!_servers.TryGetValue(serverName, out var versions))
-        {
-            return Task.FromResult<ServerResponse?>(null);
-        }
-
-        if (version.Equals("latest", StringComparison.OrdinalIgnoreCase))
-        {
-            var latestVersion = versions.FirstOrDefault(v => v.Meta.Official?.IsLatest == true);
-            return Task.FromResult(latestVersion);
-        }
-
-        var specificVersion = versions.FirstOrDefault(v => v.Server.Version == version);
-        return Task.FromResult(specificVersion);
+        return await _repository.GetServerVersionAsync(serverName, version);
     }
 
-    public Task<bool> DeleteServerVersionAsync(string serverName, string version)
+    public async Task<bool> DeleteServerVersionAsync(string serverName, string version)
     {
-        if (!_servers.TryGetValue(serverName, out var versions))
-        {
-            return Task.FromResult(false);
-        }
-
-        var versionToDelete = versions.FirstOrDefault(v => v.Server.Version == version);
-        if (versionToDelete == null)
-        {
-            return Task.FromResult(false);
-        }
-
-        versions.Remove(versionToDelete);
-
-        if (versions.Count == 0)
-        {
-            _servers.TryRemove(serverName, out _);
-        }
-        else if (versionToDelete.Meta.Official?.IsLatest == true)
-        {
-            var newLatest = versions
-                .OrderByDescending(v => v.Meta.Official?.PublishedAt ?? DateTime.MinValue)
-                .FirstOrDefault();
-
-            if (newLatest?.Meta.Official != null)
-            {
-                newLatest.Meta.Official.IsLatest = true;
-            }
-        }
-
-        return Task.FromResult(true);
+        return await _repository.DeleteServerVersionAsync(serverName, version);
     }
 
-    public Task AddServerAsync(ServerDetail server)
+    public async Task AddServerAsync(ServerDetail server)
     {
-        throw new NotImplementedException();
-    }
-
-    private void SeedSampleData()
-    {
-        var filesystemServer = new ServerResponse
-        {
-            Server = new ServerDetail
-            {
-                Name = "io.modelcontextprotocol/filesystem",
-                Description = "Node.js server implementing Model Context Protocol (MCP) for filesystem operations.",
-                Title = "Filesystem",
-                Version = "1.0.2",
-                Repository = new Repository
-                {
-                    Url = "https://github.com/modelcontextprotocol/servers",
-                    Source = "github"
-                },
-                Packages = new List<Package>
-                {
-                    new()
-                    {
-                        RegistryType = "npm",
-                        RegistryBaseUrl = "https://registry.npmjs.org",
-                        Identifier = "@modelcontextprotocol/server-filesystem",
-                        Version = "1.0.2",
-                        Transport = new StdioTransport()
-                    }
-                }
-            },
-            Meta = new ServerResponseMeta
-            {
-                Official = new OfficialRegistryMeta
-                {
-                    Status = ServerStatus.Active,
-                    PublishedAt = DateTime.UtcNow.AddDays(-30),
-                    UpdatedAt = DateTime.UtcNow.AddDays(-5),
-                    IsLatest = true
-                }
-            }
-        };
-
-        var filesystemServerOld = new ServerResponse
-        {
-            Server = new ServerDetail
-            {
-                Name = "io.modelcontextprotocol/filesystem",
-                Description = "Node.js server implementing Model Context Protocol (MCP) for filesystem operations.",
-                Title = "Filesystem",
-                Version = "1.0.1",
-                Repository = new Repository
-                {
-                    Url = "https://github.com/modelcontextprotocol/servers",
-                    Source = "github"
-                },
-                Packages = new List<Package>
-                {
-                    new()
-                    {
-                        RegistryType = "npm",
-                        RegistryBaseUrl = "https://registry.npmjs.org",
-                        Identifier = "@modelcontextprotocol/server-filesystem",
-                        Version = "1.0.1",
-                        Transport = new StdioTransport()
-                    }
-                }
-            },
-            Meta = new ServerResponseMeta
-            {
-                Official = new OfficialRegistryMeta
-                {
-                    Status = ServerStatus.Active,
-                    PublishedAt = DateTime.UtcNow.AddDays(-45),
-                    UpdatedAt = DateTime.UtcNow.AddDays(-45),
-                    IsLatest = false
-                }
-            }
-        };
-
-        _servers.TryAdd("io.modelcontextprotocol/filesystem", new List<ServerResponse> { filesystemServer, filesystemServerOld });
-
-        var braveSearchServer = new ServerResponse
-        {
-            Server = new ServerDetail
-            {
-                Name = "io.modelcontextprotocol/brave-search",
-                Description = "MCP server for Brave Search API integration",
-                Title = "Brave Search",
-                Version = "0.1.0",
-                Repository = new Repository
-                {
-                    Url = "https://github.com/modelcontextprotocol/servers",
-                    Source = "github",
-                    Subfolder = "src/brave-search"
-                },
-                WebsiteUrl = "https://modelcontextprotocol.io",
-                Packages = new List<Package>
-                {
-                    new()
-                    {
-                        RegistryType = "npm",
-                        RegistryBaseUrl = "https://registry.npmjs.org",
-                        Identifier = "@modelcontextprotocol/server-brave-search",
-                        Version = "0.1.0",
-                        Transport = new StdioTransport()
-                    }
-                }
-            },
-            Meta = new ServerResponseMeta
-            {
-                Official = new OfficialRegistryMeta
-                {
-                    Status = ServerStatus.Active,
-                    PublishedAt = DateTime.UtcNow.AddDays(-10),
-                    UpdatedAt = DateTime.UtcNow.AddDays(-2),
-                    IsLatest = true
-                }
-            }
-        };
-
-        _servers.TryAdd("io.modelcontextprotocol/brave-search", new List<ServerResponse> { braveSearchServer });
+        await _repository.AddServerAsync(server);
     }
 }
+

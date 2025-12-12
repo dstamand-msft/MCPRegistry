@@ -1,12 +1,13 @@
 using MCPRegistry.Models;
 
-namespace MCPRegistry.Services;
+namespace MCPRegistry.Data;
 
-public interface IServerRegistryService
+public interface IServerRepository
 {
-    Task<(List<ServerDetail> servers, string? nextCursor)> GetServersAsync(
-        string? cursor,
-        int? limit,
+    Task<List<ServerDetail>> GetServersAsync(
+        string? cursorServerName,
+        string? cursorVersion,
+        int take,
         string? search,
         DateTime? updatedSince,
         string? version);

@@ -6,18 +6,6 @@ public class ServerResponse
 {
     [JsonPropertyName("server")]
     public required ServerDetail Server { get; set; }
-
-    [JsonPropertyName("_meta")]
-    public required ServerResponseMeta Meta { get; set; }
-}
-
-public class ServerResponseMeta
-{
-    [JsonPropertyName("io.modelcontextprotocol.registry/official")]
-    public OfficialRegistryMeta? Official { get; set; }
-
-    [JsonExtensionData]
-    public Dictionary<string, object>? AdditionalData { get; set; }
 }
 
 public class OfficialRegistryMeta

@@ -1,3 +1,4 @@
+using MCPRegistry.Data;
 using MCPRegistry.Services;
 using System.Text.Json.Serialization;
 
@@ -9,7 +10,8 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.AddSingleton<IServerRegistryService, ServerRegistryService>();
+        builder.Services.AddScoped<IServerRepository, SqlServerServerRepository>();
+        builder.Services.AddScoped<IServerRegistryService, ServerRegistryService>();
 
         builder.Services.AddControllers()
             .AddJsonOptions(options =>
