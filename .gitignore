@@ -484,4 +484,4 @@ $RECYCLE.BIN/
 *.swp
 
 # exclude environment specific appsettings
-*.appsettings.json
+src/**/appsettings.*.json
