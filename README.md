@@ -1,6 +1,7 @@
 # MCP Registry API
 
 This is an implementation of the Model Context Protocol (MCP) Server Registry API based on the official OpenAPI specification.
+For more information, see [GitHub MCP registry documentation](https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-mcp-usage/configure-mcp-registry#option-1-self-hosting-an-mcp-registry).
 
 ## Features
 

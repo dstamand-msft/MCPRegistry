@@ -29,8 +29,8 @@ public class Program
             options.AddDefaultPolicy(policy =>
             {
                 policy.AllowAnyOrigin()
-                    .AllowAnyHeader()
-                    .WithMethods("GET", "POST", "DELETE");
+                    .WithHeaders("Authorization, Content-Type")
+                    .WithMethods("GET");
             });
         });
 
