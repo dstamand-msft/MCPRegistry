@@ -9,14 +9,14 @@
       "source": "github",
       "subfolder": "servers/Azure.Mcp.Server"
     },
-    "version": "2.0.0-beta.7",
+    "version": "2.0.0-beta.6",
     "websiteUrl": "https://azure.microsoft.com/",
     "packages": [
       {
         "registryType": "npm",
         "registryBaseUrl": "https://registry.npmjs.org",
         "identifier": "@azure/mcp",
-        "version": "2.0.0-beta.7",
+        "version": "2.0.0-beta.6",
         "transport": {
           "$transport-type": "stdio",
           "type": "stdio"
@@ -35,7 +35,7 @@
       {
         "registryType": "nuget",
         "identifier": "Azure.Mcp",
-        "version": "2.0.0-beta.7",
+        "version": "2.0.0-beta.6",
         "transport": {
           "$transport-type": "stdio",
           "type": "stdio"

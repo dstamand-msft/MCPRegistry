@@ -88,28 +88,122 @@ The API will be available at:
 
 Use the included `MCPRegistry.http` file to test the API endpoints directly from VS Code (requires REST Client extension).
 
+
 ## Sample Data
 
-The API comes with sample data for testing:
+The API comes with the following sample servers for testing (see `data/sample-seed-data.json`):
 
-1. **Filesystem Server** (`io.modelcontextprotocol/filesystem`)
-   - Version 1.0.2 (latest)
-   - Version 1.0.1 (older)
+1. **Azure MCP Server** (`com.microsoft/azure`)
+   - Title: Azure MCP Server
+   - Description: All Azure MCP tools to create a seamless connection between AI agents and Azure services.
+   - Version: 2.0.0-beta.6
+   - Website: https://azure.microsoft.com/
+   - Packages: npm (@azure/mcp), nuget (Azure.Mcp)
 
-2. **Brave Search Server** (`io.modelcontextprotocol/brave-search`)
-   - Version 0.1.0 (latest)
+2. **Azure DevOps MCP Server** (`com.microsoft/azure-devops-mcp`)
+   - Title: Azure DevOps MCP Server
+   - Description: Azure DevOps—work items, repositories, pipelines, test plans, wiki, search, and more.
+   - Version: 2.2.2
+   - Website: https://github.com/microsoft/azure-devops-mcp
+   - Packages: npm (@azure-devops/mcp)
+
+3. **Microsoft Learn MCP** (`com.microsoft/microsoft-learn-mcp`)
+   - Title: Microsoft Learn MCP
+   - Description: Official Microsoft Learn MCP Server – real-time, trusted docs & code samples for AI and LLMs.
+   - Version: 1.0.0
+   - Website: https://github.com/MicrosoftDocs/mcp
+   - Remotes: https://learn.microsoft.com/api/mcp
+
+4. **Atlassian MCP Server** (`com.atlassian/atlassian-mcp-server`)
+   - Description: Connect to Jira and Confluence for issue tracking and documentation.
+   - Version: 1.0.0
+   - Remotes: https://mcp.atlassian.com/v1/sse
+
+5. **GitHub MCP Server** (`io.github.github/github-mcp-server`)
+   - Description: Official GitHub Remote MCP Server offering the default toolset for GitHub integrations.
+   - Version: 1.0.0
+   - Website: https://github.com/github/github-mcp-server
+   - Remotes: https://api.githubcopilot.com/mcp/
+
+## Adding a New Server Example
+
+To add a new server, you can use the format in `data/new-version-data.json`. For example, to add a new Azure MCP Server version:
+
+```json
+[
+  {
+    "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+    "name": "com.microsoft/azure",
+    "description": "All Azure MCP tools to create a seamless connection between AI agents and Azure services.",
+    "title": "Azure MCP Server",
+    "repository": {
+      "url": "https://github.com/microsoft/mcp",
+      "source": "github",
+      "subfolder": "servers/Azure.Mcp.Server"
+    },
+    "version": "2.0.0-beta.7",
+    "websiteUrl": "https://azure.microsoft.com/",
+    "packages": [
+      {
+        "registryType": "npm",
+        "registryBaseUrl": "https://registry.npmjs.org",
+        "identifier": "@azure/mcp",
+        "version": "2.0.0-beta.7",
+        "transport": {
+          "$transport-type": "stdio",
+          "type": "stdio"
+        },
+        "packageArguments": [
+          { "value": "server", "type": "positional" },
+          { "value": "start", "type": "positional" }
+        ]
+      },
+      {
+        "registryType": "nuget",
+        "identifier": "Azure.Mcp",
+        "version": "2.0.0-beta.7",
+        "transport": {
+          "$transport-type": "stdio",
+          "type": "stdio"
+        },
+        "packageArguments": [
+          { "value": "server", "type": "positional" },
+          { "value": "start", "type": "positional" }
+        ]
+      }
+    ]
+  }
+]
+```
+
+You can POST this JSON to the appropriate endpoint (when implemented) or use it as a template for adding new servers to the registry's data store.
+
 
 ## Architecture
 
 - **Models/** - Data transfer objects (DTOs) matching the OpenAPI schema
 - **Services/** - Business logic for server registry management
 - **Controllers/** - API endpoints implementation
+- **Data/** - Data access layer, including repository interfaces and implementations
+- **SQLProject/** - Contains the SQL Server database project for schema and migrations
 
-The current implementation uses an in-memory data store (`ServerRegistryService`) with sample data. In production, this would be replaced with a persistent data store.
+### Data Store Implementation
+
+The current implementation uses a SQL Server-based data store for server registry persistence. The data access is handled through the `IServerRepository` interface (`MCPRegistry.Data.IServerRepository`), which defines all required operations for managing servers and their versions. The default implementation, `SqlServerServerRepository`, provides a concrete integration with SQL Server.
+
+The solution includes a `SQLProject` directory containing the SQL Server database project, which manages the schema and migrations for the registry data.
+
+#### Extensibility
+
+To support other data stores (e.g., PostgreSQL, MongoDB, in-memory, etc.), implement the `IServerRepository` interface with your own data access logic. Register your implementation in the dependency injection container to replace or extend the default SQL Server-based repository. This design allows for easy swapping or extension of the data storage backend without changing the business logic or API controllers.
+
+**Key extensibility point:**
+
+- Implement the `IServerRepository` interface to add support for a new data store.
 
 ## Notes
 
-- The POST `/v0.1/publish` endpoint is **not implemented** as per requirements
+- The POST `/v0.1/publish` endpoint is **not implemented**
 - All endpoints use `/v0.1` prefix instead of `/v0`
-- The DELETE endpoint is optional and returns 200 on success (registry supports deletion)
+- The DELETE endpoint is optional and returns 200 on success (registry supports deletion, in soft mode)
 - Server names in URLs must be URL-encoded (forward slashes become `%2F`)
