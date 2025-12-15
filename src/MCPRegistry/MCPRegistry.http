@@ -1,4 +1,3 @@
-#@MCPRegistry_HostAddress = http://localhost:8080
 @MCPRegistry_HostAddress = https://localhost:7160
 
 ### List all servers

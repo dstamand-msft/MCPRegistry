@@ -48,5 +48,17 @@ public class ServerDetail
     public List<Transport>? Remotes { get; set; }
 
     [JsonPropertyName("_meta")]
-    public Dictionary<string, object>? Meta { get; set; }
+    public Dictionary<string, object> Meta { get; set; } = new();
+
+    [JsonIgnore]
+    public string Status { get; set; }
+
+    [JsonIgnore]
+    public DateTimeOffset AddedAt { get; set; }
+
+    [JsonIgnore]
+    public DateTimeOffset UpdatedAt { get; set; }
+
+    [JsonIgnore]
+    public bool IsLatest { get; set; }
 }

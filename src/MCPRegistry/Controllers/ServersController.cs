@@ -69,15 +69,29 @@ public class ServersController : ControllerBase
 
             var response = new ServerList
             {
-                Servers = servers.Select(server => new ServerResponse { Server = server }).ToList(),
+                Servers = servers.Select(server => new ServerResponse
+                {
+                    Server = server,
+                    Meta = new Dictionary<string, object>
+                    {
+                        {"io.modelcontextprotocol.registry/official", new Dictionary<string, object>
+                        {
+                            { "status", server.Status },
+                            { "publishedAt", server.AddedAt.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss.ffffff'Z'") },
+                            { "updatedAt", server.UpdatedAt.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss.ffffff'Z'") },
+                            { "isLatest", server.IsLatest }
+
+                        }}
+                    }
+                }).ToList(),
                 Metadata = new ServerListMetadata
                 {
                     NextCursor = nextCursor,
                     Count = servers.Count
                 }
             };
-
-            return Ok(response);
+            
+           return new JsonResult(response);
         }
         catch (Exception ex)
         {
@@ -115,14 +129,28 @@ public class ServersController : ControllerBase
 
             var response = new ServerList
             {
-                Servers = versions.Select(server => new ServerResponse{Server = server }).ToList(),
+                Servers = versions.Select(server => new ServerResponse
+                {
+                    Server = server,
+                    Meta = new Dictionary<string, object>
+                    {
+                        {"io.modelcontextprotocol.registry/official", new Dictionary<string, object>
+                        {
+                            { "status", server.Status },
+                            { "publishedAt", server.AddedAt.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss.ffffff'Z'") },
+                            { "updatedAt", server.UpdatedAt.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss.ffffff'Z'") },
+                            { "isLatest", server.IsLatest }
+
+                        }}
+                    }
+                }).ToList(),
                 Metadata = new ServerListMetadata
                 {
                     Count = versions.Count
                 }
             };
 
-            return Ok(response);
+            return new JsonResult(response);
         }
         catch (Exception ex)
         {
@@ -159,7 +187,25 @@ public class ServersController : ControllerBase
                 return NotFound("Server not found");
             }
 
-            return Ok(serverVersion);
+            var serverResponse = new ServerResponse
+            {
+                Server = serverVersion,
+                Meta = new Dictionary<string, object>
+                {
+                    {
+                        "io.modelcontextprotocol.registry/official", new Dictionary<string, object>
+                        {
+                            { "status", serverVersion.Status },
+                            { "publishedAt", serverVersion.AddedAt.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss.ffffff'Z'") },
+                            { "updatedAt", serverVersion.UpdatedAt.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss.ffffff'Z'") },
+                            { "isLatest", serverVersion.IsLatest }
+
+                        }
+                    }
+                }
+            };
+
+            return new JsonResult(serverResponse);
         }
         catch (Exception ex)
         {
@@ -195,7 +241,7 @@ public class ServersController : ControllerBase
                 return Problem("Failed to delete server version", statusCode: StatusCodes.Status500InternalServerError, title: "Internal server error");
             }
 
-            return Ok(serverVersion);
+            return Ok();
         }
         catch (Exception ex)
         {

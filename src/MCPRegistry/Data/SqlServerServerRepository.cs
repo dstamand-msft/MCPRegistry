@@ -27,7 +27,7 @@ public class SqlServerServerRepository : IServerRepository
         string? version)
     {
         using var connection = CreateConnection();
-        var sql = "SELECT [Value] FROM Servers WHERE 1=1";
+        var sql = "SELECT [Value], [Status], [AddedAt], [UpdatedAt], IsLatest FROM Servers WHERE 1=1";
         var parameters = new DynamicParameters();
 
         if (!string.IsNullOrEmpty(search))
@@ -85,26 +85,50 @@ public class SqlServerServerRepository : IServerRepository
         sql += " ORDER BY ServerName ASC, Version ASC OFFSET 0 ROWS FETCH NEXT @Take ROWS ONLY";
         parameters.Add("Take", take);
 
-        var jsonResults = await connection.QueryAsync<string>(sql, parameters);
+        var results = await connection.QueryAsync(sql, parameters);
 
-        var servers = jsonResults
-            .Select(json => JsonSerializer.Deserialize<ServerDetail>(json))
-            .Where(s => s != null)
-            .ToList();
+        var servers = new List<ServerDetail>();
+        foreach (var result in results)
+        {
+            ServerDetail server = JsonSerializer.Deserialize<ServerDetail>(result.Value);
+            if (server == null)
+            {
+                continue;
+            }
 
-        return servers!;
+            server.AddedAt = result.AddedAt;
+            server.UpdatedAt = result.UpdatedAt;
+            server.Status = result.Status;
+            server.IsLatest = result.IsLatest;
+            servers.Add(server);
+        }
+
+        return servers;
     }
 
     public async Task<List<ServerDetail>> GetServerVersionsAsync(string serverName)
     {
         using var connection = CreateConnection();
-        var sql = "SELECT [Value] FROM Servers WHERE ServerName = @Name ORDER BY CreatedAt DESC";
-        var jsonResults = await connection.QueryAsync<string>(sql, new { Name = serverName });
+        var sql = "SELECT [Value], [Status], [AddedAt], [UpdatedAt], IsLatest FROM Servers WHERE ServerName = @Name ORDER BY CreatedAt DESC";
+        var results = await connection.QueryAsync(sql, new { Name = serverName });
 
-        return jsonResults
-            .Select(json => JsonSerializer.Deserialize<ServerDetail>(json))
-            .Where(s => s != null)
-            .ToList()!;
+        var servers = new List<ServerDetail>();
+        foreach (var result in results)
+        {
+            ServerDetail server = JsonSerializer.Deserialize<ServerDetail>(result.Value);
+            if (server == null)
+            {
+                continue;
+            }
+
+            server.AddedAt = result.AddedAt;
+            server.UpdatedAt = result.UpdatedAt;
+            server.Status = result.Status;
+            server.IsLatest = result.IsLatest;
+            servers.Add(server);
+        }
+
+        return servers;
     }
 
     public async Task<ServerDetail?> GetServerVersionAsync(string serverName, string version)
@@ -115,18 +139,29 @@ public class SqlServerServerRepository : IServerRepository
 
         if (version == "latest")
         {
-            sql = "SELECT [Value] FROM Servers WHERE ServerName = @Name AND IsLatest = 1";
+            sql = "SELECT [Value], [Status], [AddedAt], [UpdatedAt], IsLatest FROM Servers WHERE ServerName = @Name AND IsLatest = 1";
             param = new { Name = serverName };
         }
         else
         {
-            sql = "SELECT [Value] FROM Servers WHERE ServerName = @Name AND Version = @Version";
+            sql = "SELECT [Value], [Status], [AddedAt], [UpdatedAt], IsLatest FROM Servers WHERE ServerName = @Name AND Version = @Version";
             param = new { Name = serverName, Version = version };
         }
 
-        var jsonResult = await connection.QueryFirstOrDefaultAsync<string>(sql, param);
+        var result = await connection.QueryFirstOrDefaultAsync(sql, param);
 
-        return jsonResult != null ? JsonSerializer.Deserialize<ServerDetail>(jsonResult) : null;
+        if (result != null)
+        {
+            ServerDetail server = JsonSerializer.Deserialize<ServerDetail>(result.Value);
+            server.AddedAt = result.AddedAt;
+            server.UpdatedAt = result.UpdatedAt;
+            server.Status = result.Status;
+            server.IsLatest = result.IsLatest;
+
+            return server;
+        }
+
+        return null;
     }
 
     public async Task<bool> DeleteServerVersionAsync(string serverName, string version)
@@ -141,19 +176,6 @@ public class SqlServerServerRepository : IServerRepository
             // soft-delete instead of hard delete
             var updateSql = "UPDATE Servers SET [Status] = 'deleted' WHERE ServerName = @Name AND Version = @Version";
             await connection.ExecuteAsync(updateSql, new { Name = serverName, Version = version }, transaction);
-
-            // set the latest version to the last known good.
-            //var updateLatestSql = @"
-            //        WITH NewLatest AS (
-            //            SELECT TOP 1 *
-            //            FROM Servers
-            //            WHERE ServerName = @Name
-            //            ORDER BY CreatedAt DESC
-            //        )
-            //        UPDATE NewLatest
-            //        SET IsLatest = 1";
-
-            //await connection.ExecuteAsync(updateLatestSql, new { Name = serverName }, transaction);
 
             transaction.Commit();
             return true;

@@ -134,6 +134,12 @@
         "type": "streamable-http",
         "url": "https://api.githubcopilot.com/mcp/"
       }
-    ]
+    ],
+    "_meta": {
+      "io.modelcontextprotocol.registry/publisher-provided": {
+        "docUrl": "https://raw.githubusercontent.com/github/github-mcp-server/main/docs/remote-server.md",
+        "hostedBy": "GitHub"
+      }
+    }
   }
 ]
