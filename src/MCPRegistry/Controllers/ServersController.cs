@@ -2,6 +2,7 @@ using MCPRegistry.Models;
 using MCPRegistry.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Cors;
 
 namespace MCPRegistry.Controllers;
 
@@ -40,6 +41,7 @@ public class ServersController : ControllerBase
     /// <returns>An ActionResult containing a ServerList object with the matching servers and pagination metadata. Returns a 200
     /// OK response with the results, or a 500 Internal Server Error if an unexpected error occurs.</returns>
     [HttpGet]
+    [EnableCors(Constants.CorsServersEndpointPolicy)]
     [ProducesResponseType(typeof(ServerList), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -112,6 +114,7 @@ public class ServersController : ControllerBase
     /// <returns>An <see cref="ActionResult{T}"/> containing a <see cref="ServerList"/> with the available server versions if the
     /// server exists; otherwise, a 404 Not Found response with an error message.</returns>
     [HttpGet("{serverName}/versions")]
+    [EnableCors(Constants.CorsServersEndpointPolicy)]
     [ProducesResponseType(typeof(ServerList), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -170,6 +173,7 @@ public class ServersController : ControllerBase
     /// <returns>An <see cref="ActionResult{T}"/> containing a <see cref="ServerResponse"/> with the server version details if
     /// found; otherwise, a 404 Not Found response with an <see cref="ProblemDetails"/>.</returns>
     [HttpGet("{serverName}/versions/{version}")]
+    [EnableCors(Constants.CorsServersEndpointPolicy)]
     [ProducesResponseType(typeof(ServerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -218,6 +222,7 @@ public class ServersController : ControllerBase
     /// Delete specific version of an MCP server
     /// </summary>
     [HttpDelete("{serverName}/versions/{version}")]
+    [EnableCors(Constants.CorsServersEndpointPolicy)]
     [ProducesResponseType(typeof(ServerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]

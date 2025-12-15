@@ -26,7 +26,7 @@ public class Program
         builder.Services.AddProblemDetails();
         builder.Services.AddCors(options =>
         {
-            options.AddDefaultPolicy(policy =>
+            options.AddPolicy(Constants.CorsServersEndpointPolicy, policy =>
             {
                 policy.AllowAnyOrigin()
                     .WithHeaders("Authorization, Content-Type")
@@ -43,7 +43,7 @@ public class Program
         }
 
         app.UseHttpsRedirection();
-        app.UseCors();
+        app.UseCors(Constants.CorsServersEndpointPolicy);
         app.UseAuthorization();
         app.MapControllers();
 
