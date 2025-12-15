@@ -208,3 +208,4 @@ To support other data stores (e.g., PostgreSQL, MongoDB, in-memory, etc.), imple
 - All endpoints use `/v0.1` prefix instead of `/v0`
 - The DELETE endpoint is optional and returns 200 on success (registry supports deletion, in soft mode)
 - Server names in URLs must be URL-encoded (forward slashes become `%2F`)
+- If you want to test locally using VSCode, set the `chat.mcp.gallery.serviceUrl` setting in your VSCode settings to point to your local instance (e.g., `https://localhost:7160/v0.1/servers`)
