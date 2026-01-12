@@ -39,7 +39,7 @@ public class ServerDetail
 
     [JsonPropertyName("$schema")]
     [JsonPropertyOrder(-1)]
-    public string? Schema { get; set; } = "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json";
+    public string? Schema { get; set; } = "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json";
 
     [JsonPropertyName("packages")]
     public List<Package>? Packages { get; set; }

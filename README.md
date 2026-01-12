@@ -133,7 +133,7 @@ To add a new server, you can use the format in `data/new-version-data.json`. For
 ```json
 [
   {
-    "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+    "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
     "name": "com.microsoft/azure",
     "description": "All Azure MCP tools to create a seamless connection between AI agents and Azure services.",
     "title": "Azure MCP Server",
