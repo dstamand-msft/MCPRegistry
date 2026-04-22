@@ -3,6 +3,7 @@ using MCPRegistry.Data;
 using MCPRegistry.Models;
 using MCPRegistry.Services;
 using NSubstitute;
+using Xunit;
 
 namespace MCPRegistry.Tests.Services;
 
@@ -29,6 +30,7 @@ public class ServerRegistryServiceTests
     };
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task GetServersAsync_DefaultsTo30PageSize()
     {
         _repo.GetServersAsync(null, null, 30, null, null, null)
@@ -40,6 +42,7 @@ public class ServerRegistryServiceTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task GetServersAsync_UsesProvidedLimit()
     {
         _repo.GetServersAsync(null, null, 10, null, null, null)
@@ -51,6 +54,7 @@ public class ServerRegistryServiceTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task GetServersAsync_ParsesCompositeCursor()
     {
         _repo.GetServersAsync("com.test/server", "1.0.0", 30, null, null, null)
@@ -62,6 +66,7 @@ public class ServerRegistryServiceTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task GetServersAsync_TreatsMalformedCursorAsServerNameOnly()
     {
         _repo.GetServersAsync("malformed-cursor", null, 30, null, null, null)
@@ -73,6 +78,7 @@ public class ServerRegistryServiceTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task GetServersAsync_ReturnsNextCursor_WhenPageIsFull()
     {
         var servers = Enumerable.Range(1, 30)
@@ -87,6 +93,7 @@ public class ServerRegistryServiceTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task GetServersAsync_ReturnsNullCursor_WhenPageIsNotFull()
     {
         var servers = new List<ServerDetail> { CreateTestServer() };
@@ -99,6 +106,7 @@ public class ServerRegistryServiceTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task GetServersAsync_PassesSearchAndFilters()
     {
         var updatedSince = new DateTime(2026, 1, 1);
@@ -111,6 +119,7 @@ public class ServerRegistryServiceTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task GetServerVersionsAsync_DelegatesToRepository()
     {
         var versions = new List<ServerDetail> { CreateTestServer() };
@@ -123,6 +132,7 @@ public class ServerRegistryServiceTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task GetServerVersionsAsync_ReturnsEmpty_WhenServerNotFound()
     {
         _repo.GetServerVersionsAsync("com.test/unknown")
@@ -134,6 +144,7 @@ public class ServerRegistryServiceTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task GetServerVersionAsync_ReturnsServer_WhenFound()
     {
         var server = CreateTestServer();
@@ -147,6 +158,7 @@ public class ServerRegistryServiceTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task GetServerVersionAsync_ReturnsNull_WhenNotFound()
     {
         _repo.GetServerVersionAsync("com.test/server", "9.9.9")
@@ -158,6 +170,7 @@ public class ServerRegistryServiceTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task DeleteServerVersionAsync_ReturnsTrue_WhenDeleted()
     {
         _repo.DeleteServerVersionAsync("com.test/server", "1.0.0")
@@ -169,6 +182,7 @@ public class ServerRegistryServiceTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task DeleteServerVersionAsync_ReturnsFalse_WhenNotFound()
     {
         _repo.DeleteServerVersionAsync("com.test/server", "9.9.9")
@@ -180,6 +194,7 @@ public class ServerRegistryServiceTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task AddServerAsync_DelegatesToRepository()
     {
         var server = CreateTestServer();

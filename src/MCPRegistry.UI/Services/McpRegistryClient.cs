@@ -22,7 +22,8 @@ public class McpRegistryClient
 
     public async Task<ServerListResponse> GetServerVersionsAsync(string serverName)
     {
-        return await _http.GetFromJsonAsync<ServerListResponse>($"v0.1/servers/{serverName}/versions") ?? new ServerListResponse();
+        var encoded = Uri.EscapeDataString(serverName);
+        return await _http.GetFromJsonAsync<ServerListResponse>($"v0.1/servers/{encoded}/versions") ?? new ServerListResponse();
     }
 
     public async Task<bool> AddServersAsync(List<ServerDetail> servers)
@@ -33,7 +34,8 @@ public class McpRegistryClient
 
     public async Task<bool> DeleteServerVersionAsync(string serverName, string version)
     {
-        var response = await _http.DeleteAsync($"v0.1/servers/{serverName}/versions/{version}");
+        var encoded = Uri.EscapeDataString(serverName);
+        var response = await _http.DeleteAsync($"v0.1/servers/{encoded}/versions/{Uri.EscapeDataString(version)}");
         return response.IsSuccessStatusCode;
     }
 }

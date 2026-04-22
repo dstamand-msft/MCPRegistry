@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using Xunit;
 
 namespace MCPRegistry.Tests.Controllers;
 
@@ -35,6 +36,7 @@ public class ServersControllerTests
     };
 
     [Fact]
+    [Trait("Type","Unit")]
     public async Task ListServers_ReturnsEmptyList_WhenNoServersExist()
     {
         _service.GetServersAsync(null, null, null, null, null)
@@ -45,25 +47,29 @@ public class ServersControllerTests
         var jsonResult = result.Result.Should().BeOfType<JsonResult>().Subject;
         var serverList = jsonResult.Value.Should().BeOfType<ServerList>().Subject;
         serverList.Servers.Should().BeEmpty();
+        serverList.Metadata.Should().NotBeNull();
         serverList.Metadata.Count.Should().Be(0);
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task ListServers_ReturnsServers_WhenServersExist()
     {
         var servers = new List<ServerDetail> { CreateTestServer() };
         _service.GetServersAsync(null, null, null, null, null)
-            .Returns((servers, (string?)null));
+                .Returns((servers, (string?)null));
 
         var result = await _controller.ListServers(null, null, null, null, null);
 
         var jsonResult = result.Result.Should().BeOfType<JsonResult>().Subject;
         var serverList = jsonResult.Value.Should().BeOfType<ServerList>().Subject;
         serverList.Servers.Should().HaveCount(1);
+        serverList.Metadata.Should().NotBeNull();
         serverList.Metadata.Count.Should().Be(1);
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task ListServers_ReturnsBadRequest_WhenLimitIsZero()
     {
         var result = await _controller.ListServers(null, 0, null, null, null);
@@ -83,6 +89,7 @@ public class ServersControllerTests
     [InlineData("invalid")]
     [InlineData("1.2")]
     [InlineData("abc.def.ghi")]
+    [Trait("Type", "Unit")]
     public async Task ListServers_ReturnsBadRequest_WhenVersionIsInvalidSemver(string version)
     {
         var result = await _controller.ListServers(null, null, null, null, version);
@@ -95,6 +102,7 @@ public class ServersControllerTests
     [InlineData("1.0.0")]
     [InlineData("2.0.0-beta.6")]
     [InlineData("1.0.0+build.123")]
+    [Trait("Type", "Unit")]
     public async Task ListServers_AcceptsValidVersionFormats(string version)
     {
         _service.GetServersAsync(null, null, null, null, version)
@@ -106,6 +114,7 @@ public class ServersControllerTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task ListServers_PassesSearchToService()
     {
         _service.GetServersAsync(null, null, "azure", null, null)
@@ -117,6 +126,7 @@ public class ServersControllerTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task ListServers_Returns500_WhenServiceThrows()
     {
         _service.GetServersAsync(null, null, null, null, null)
@@ -129,17 +139,19 @@ public class ServersControllerTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task ListServerVersions_ReturnsNotFound_WhenServerDoesNotExist()
     {
         _service.GetServerVersionsAsync("com.test/unknown")
             .Returns(new List<ServerDetail>());
 
-        var result = await _controller.ListServerVersions("com.test", "unknown");
+        var result = await _controller.ListServerVersions("com.test/unknown");
 
         result.Result.Should().BeOfType<NotFoundObjectResult>();
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task ListServerVersions_ReturnsVersions_WhenServerExists()
     {
         var versions = new List<ServerDetail>
@@ -150,44 +162,48 @@ public class ServersControllerTests
         _service.GetServerVersionsAsync("com.test/server")
             .Returns(versions);
 
-        var result = await _controller.ListServerVersions("com.test", "server");
+        var result = await _controller.ListServerVersions("com.test/server");
 
         var jsonResult = result.Result.Should().BeOfType<JsonResult>().Subject;
         var serverList = jsonResult.Value.Should().BeOfType<ServerList>().Subject;
         serverList.Servers.Should().HaveCount(2);
+        serverList.Metadata.Should().NotBeNull();
         serverList.Metadata.Count.Should().Be(2);
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task ListServerVersions_DecodesUrlEncodedServerName()
     {
         _service.GetServerVersionsAsync("com.test/server")
             .Returns(new List<ServerDetail> { CreateTestServer() });
 
-        await _controller.ListServerVersions("com.test", "server");
+        await _controller.ListServerVersions("com.test/server");
 
         await _service.Received(1).GetServerVersionsAsync("com.test/server");
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task GetServerVersion_ReturnsNotFound_WhenVersionDoesNotExist()
     {
         _service.GetServerVersionAsync("com.test/server", "9.9.9")
             .Returns((ServerDetail?)null);
 
-        var result = await _controller.GetServerVersion("com.test", "server", "9.9.9");
+        var result = await _controller.GetServerVersion("com.test/server", "9.9.9");
 
         result.Result.Should().BeOfType<NotFoundObjectResult>();
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task GetServerVersion_ReturnsServer_WhenVersionExists()
     {
         var server = CreateTestServer();
         _service.GetServerVersionAsync("com.test/server", "1.0.0")
             .Returns(server);
 
-        var result = await _controller.GetServerVersion("com.test", "server", "1.0.0");
+        var result = await _controller.GetServerVersion("com.test/server", "1.0.0");
 
         var jsonResult = result.Result.Should().BeOfType<JsonResult>().Subject;
         var response = jsonResult.Value.Should().BeOfType<ServerResponse>().Subject;
@@ -195,13 +211,14 @@ public class ServersControllerTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task GetServerVersion_IncludesMetadata()
     {
         var server = CreateTestServer();
         _service.GetServerVersionAsync("com.test/server", "1.0.0")
             .Returns(server);
 
-        var result = await _controller.GetServerVersion("com.test", "server", "1.0.0");
+        var result = await _controller.GetServerVersion("com.test/server", "1.0.0");
 
         var jsonResult = result.Result.Should().BeOfType<JsonResult>().Subject;
         var response = jsonResult.Value.Should().BeOfType<ServerResponse>().Subject;
@@ -209,17 +226,19 @@ public class ServersControllerTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task DeleteServerVersion_ReturnsNotFound_WhenServerDoesNotExist()
     {
         _service.GetServerVersionAsync("com.test/server", "1.0.0")
             .Returns((ServerDetail?)null);
 
-        var result = await _controller.DeleteServerVersion("com.test", "server", "1.0.0");
+        var result = await _controller.DeleteServerVersion("com.test/server", "1.0.0");
 
         result.Should().BeOfType<NotFoundObjectResult>();
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task DeleteServerVersion_ReturnsOk_WhenDeleteSucceeds()
     {
         _service.GetServerVersionAsync("com.test/server", "1.0.0")
@@ -227,12 +246,13 @@ public class ServersControllerTests
         _service.DeleteServerVersionAsync("com.test/server", "1.0.0")
             .Returns(true);
 
-        var result = await _controller.DeleteServerVersion("com.test", "server", "1.0.0");
+        var result = await _controller.DeleteServerVersion("com.test/server", "1.0.0");
 
         result.Should().BeOfType<OkResult>();
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task DeleteServerVersion_Returns500_WhenDeleteFails()
     {
         _service.GetServerVersionAsync("com.test/server", "1.0.0")
@@ -240,13 +260,14 @@ public class ServersControllerTests
         _service.DeleteServerVersionAsync("com.test/server", "1.0.0")
             .Returns(false);
 
-        var result = await _controller.DeleteServerVersion("com.test", "server", "1.0.0");
+        var result = await _controller.DeleteServerVersion("com.test/server", "1.0.0");
 
         var problemResult = result.Should().BeOfType<ObjectResult>().Subject;
         problemResult.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task AddServers_ReturnsBadRequest_WhenListIsEmpty()
     {
         var result = await _controller.AddServers(new List<ServerDetail>());
@@ -255,6 +276,7 @@ public class ServersControllerTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task AddServers_ReturnsCreated_WhenServersAdded()
     {
         var servers = new List<ServerDetail> { CreateTestServer() };
@@ -266,6 +288,7 @@ public class ServersControllerTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task AddServers_CallsServiceForEachServer()
     {
         var servers = new List<ServerDetail>
@@ -280,6 +303,7 @@ public class ServersControllerTests
     }
 
     [Fact]
+    [Trait("Type", "Unit")]
     public async Task AddServers_Returns500_WhenServiceThrows()
     {
         _service.AddServerAsync(Arg.Any<ServerDetail>())

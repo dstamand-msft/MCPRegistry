@@ -56,18 +56,15 @@ public class ServerRegistryService : IServerRegistryService
         return versions;
     }
 
-    public async Task<ServerDetail?> GetServerVersionAsync(string serverName, string version)
-    {
-        return await _repository.GetServerVersionAsync(serverName, version);
-    }
+    public async Task<ServerDetail?> GetServerVersionAsync(string serverName, string version) => await _repository.GetServerVersionAsync(serverName, version);
 
-    public async Task<bool> DeleteServerVersionAsync(string serverName, string version)
-    {
-        return await _repository.DeleteServerVersionAsync(serverName, version);
-    }
+    public async Task<bool> DeleteServerVersionAsync(string serverName, string version) => await _repository.DeleteServerVersionAsync(serverName, version);
 
     public async Task AddServerAsync(ServerDetail server)
     {
+        // when adding new servers, the status should be active.
+        server.Status = "active";
+        server.IsLatest = true;
         await _repository.AddServerAsync(server);
     }
 }

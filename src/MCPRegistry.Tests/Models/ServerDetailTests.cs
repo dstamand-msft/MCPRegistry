@@ -1,5 +1,6 @@
 using FluentAssertions;
 using MCPRegistry.Models;
+using Xunit;
 
 namespace MCPRegistry.Tests.Models;
 

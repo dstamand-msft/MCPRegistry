@@ -51,7 +51,7 @@ public class ServerDetail
     public Dictionary<string, object> Meta { get; set; } = new();
 
     [JsonIgnore]
-    public string Status { get; set; } = "active";
+    public string Status { get; set; } = string.Empty;
 
     [JsonIgnore]
     public DateTimeOffset AddedAt { get; set; }

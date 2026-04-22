@@ -192,6 +192,11 @@ public class SqlServerServerRepository : IServerRepository
 
     public async Task AddServerAsync(ServerDetail server)
     {
+        if (server.Status != "active")
+        {
+            throw new Exception("Only active servers can be added.");
+        }
+
         using var connection = CreateConnection();
         
         var jsonData = JsonSerializer.Serialize(server);
@@ -212,10 +217,10 @@ public class SqlServerServerRepository : IServerRepository
             {
                 Name = server.Name,
                 Version = server.Version,
-                Status = "active",
+                Status = server.Status,
                 UpdatedAt = DateTimeOffset.UtcNow,
                 AddedAt = DateTimeOffset.UtcNow,
-                IsLatest = true,
+                IsLatest = server.IsLatest,
                 Value = jsonData
             }, transaction);
 

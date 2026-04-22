@@ -1,8 +1,10 @@
 ﻿<Project DefaultTargets="Build">
-  <Sdk Name="Microsoft.Build.Sql" Version="2.1.0" />
+  <!-- bug with 2.1.0, see https://github.com/microsoft/DacFx/issues/776 -->
+  <Sdk Name="Microsoft.Build.Sql" Version="2.0.0" />
   <PropertyGroup>
     <Name>MCPRegistryDatabase</Name>
-    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql170DatabaseSchemaProvider</DSP>
+    <!-- MSSQL 2022 -->
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql160DatabaseSchemaProvider</DSP>
     <ModelCollation>1033, CI</ModelCollation>
     <IncludeSchemaNameInFileName>True</IncludeSchemaNameInFileName>
     <TargetDatabaseSet>True</TargetDatabaseSet>
