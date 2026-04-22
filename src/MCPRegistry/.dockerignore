@@ -1,0 +1,13 @@
+**/.git
+**/.vs
+**/bin
+**/obj
+**/node_modules
+**/.env
+**/.azure
+**/data
+**/.dockerignore
+**/Dockerfile
+**/*.md
+**/*.http
+**/appsettings.Development.json

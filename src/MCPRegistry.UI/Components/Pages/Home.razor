@@ -1,0 +1,170 @@
+﻿@page "/"
+@using MCPRegistry.UI.Services
+@using MCPRegistry.UI.Models
+@inject McpRegistryClient Api
+@rendermode InteractiveServer
+
+<PageTitle>MCP Registry</PageTitle>
+
+<h1>MCP Server Registry</h1>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search servers..." @bind="searchTerm" @bind:event="oninput" @onkeyup="HandleSearchKeyUp" />
+            <button class="btn btn-primary" @onclick="SearchServers">Search</button>
+            <button class="btn btn-outline-secondary" @onclick="ClearSearch">Clear</button>
+        </div>
+    </div>
+    <div class="col-md-6 text-end">
+        <a href="/servers/add" class="btn btn-success">+ Add Server</a>
+    </div>
+</div>
+
+@if (loading)
+{
+    <p><em>Loading...</em></p>
+}
+else if (errorMessage is not null)
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+else if (servers.Count == 0)
+{
+    <div class="alert alert-info">No servers found. <a href="/servers/add">Add one</a>.</div>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Title</th>
+                <th>Version</th>
+                <th>Status</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in servers)
+            {
+                <tr class="@(item.IsDeleted ? "text-muted" : "")">
+                    <td><code>@item.Server.Name</code></td>
+                    <td>@(item.Server.Title ?? "—")</td>
+                    <td><span class="badge bg-primary">@item.Server.Version</span></td>
+                    <td>
+                        @if (item.IsDeleted)
+                        {
+                            <span class="badge bg-secondary">deleted</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">active</span>
+                        }
+                    </td>
+                    <td>@TruncateText(item.Server.Description, 80)</td>
+                    <td>
+                        <a href="/servers/@item.Server.Name" class="btn btn-sm btn-outline-primary">Versions</a>
+                        @if (!item.IsDeleted)
+                        {
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => ConfirmDelete(item.Server.Name, item.Server.Version)">Delete</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p class="text-muted">@servers.Count server(s) shown</p>
+}
+
+@if (showDeleteConfirm)
+{
+    <div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Delete <strong>@deleteServerName</strong> version <strong>@deleteVersion</strong>?</p>
+                    <p class="text-muted">This sets the status to "deleted" (soft-delete).</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CancelDelete">Cancel</button>
+                    <button class="btn btn-danger" @onclick="ExecuteDelete">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<ServerResponseItem> servers = [];
+    private string? searchTerm;
+    private bool loading = true;
+    private string? errorMessage;
+
+    private bool showDeleteConfirm;
+    private string deleteServerName = "";
+    private string deleteVersion = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadServers();
+    }
+
+    private async Task LoadServers()
+    {
+        loading = true;
+        errorMessage = null;
+        try
+        {
+            var result = await Api.GetServersAsync(searchTerm);
+            servers = result.Servers;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to load servers: {ex.Message}";
+        }
+        loading = false;
+    }
+
+    private async Task SearchServers() => await LoadServers();
+
+    private async Task ClearSearch()
+    {
+        searchTerm = null;
+        await LoadServers();
+    }
+
+    private async Task HandleSearchKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            await LoadServers();
+    }
+
+    private void ConfirmDelete(string name, string version)
+    {
+        deleteServerName = name;
+        deleteVersion = version;
+        showDeleteConfirm = true;
+    }
+
+    private void CancelDelete() => showDeleteConfirm = false;
+
+    private async Task ExecuteDelete()
+    {
+        showDeleteConfirm = false;
+        await Api.DeleteServerVersionAsync(deleteServerName, deleteVersion);
+        await LoadServers();
+    }
+
+    private static string TruncateText(string? text, int maxLength)
+    {
+        if (string.IsNullOrEmpty(text)) return "—";
+        return text.Length <= maxLength ? text : text[..maxLength] + "...";
+    }
+}
+
+Welcome to your new app.

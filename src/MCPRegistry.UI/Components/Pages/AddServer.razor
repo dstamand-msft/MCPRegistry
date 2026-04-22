@@ -1,0 +1,334 @@
+﻿@page "/servers/add"
+@using MCPRegistry.UI.Services
+@using MCPRegistry.UI.Models
+@inject McpRegistryClient Api
+@inject ServerTemplateService Templates
+@inject NavigationManager Nav
+@rendermode InteractiveServer
+
+<PageTitle>Add Server</PageTitle>
+
+<h1>Add Server</h1>
+
+<div class="row">
+    <div class="col-md-10">
+
+        <div class="card mb-4 border-primary">
+            <div class="card-body">
+                <h5 class="card-title">Quick Start</h5>
+                <p class="card-text text-muted">Choose a pre-configured server template or start from scratch.</p>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button type="button" class="btn btn-outline-secondary @(selectedTemplate is null ? "active" : "")" @onclick="ClearTemplate">
+                        ✨ Start from scratch
+                    </button>
+                    @foreach (var tmpl in templates)
+                    {
+                        var t = tmpl;
+                        <button type="button" class="btn btn-outline-primary @(selectedTemplate == t.Name ? "active" : "")" @onclick="() => ApplyTemplate(t)">
+                            @(t.Title ?? t.Name) <span class="badge bg-secondary">v@(t.Version)</span>
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <EditForm Model="server" OnValidSubmit="HandleSubmit" FormName="addServer">
+            <DataAnnotationsValidator />
+
+            <h5>Basic Information</h5>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Server Name <span class="text-danger">*</span> <span class="info-tip" title="Unique identifier in reverse-domain format (e.g., com.microsoft/azure). Must contain a '/' separator." >i</span></label>
+                    <InputText class="form-control" @bind-Value="server.Name" placeholder="com.example/my-mcp-server" />
+                    <div class="form-text">Format: <code>domain/name</code></div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Version <span class="text-danger">*</span> <span class="info-tip" title="Semantic version (semver) of this server release. Use format major.minor.patch, optionally with pre-release suffix (e.g., 2.0.0-beta.1)." >i</span></label>
+                    <InputText class="form-control" @bind-Value="server.Version" placeholder="1.0.0" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Title <span class="info-tip" title="Human-readable display name for the server. Shown in registry listings and search results." >i</span></label>
+                    <InputText class="form-control" @bind-Value="server.Title" placeholder="My MCP Server" />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Description <span class="info-tip" title="Brief description of what the MCP server does. Used in search results and server listings." >i</span></label>
+                <InputTextArea class="form-control" @bind-Value="server.Description" rows="2" placeholder="What does this MCP server do?" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Website URL <span class="info-tip" title="Public website or documentation URL for this server. Typically a GitHub repo or product page." >i</span></label>
+                <InputText class="form-control" @bind-Value="server.WebsiteUrl" placeholder="https://github.com/..." />
+            </div>
+
+            <hr />
+            <h5>Repository <span class="info-tip" title="Source code repository where this server's code is hosted. Helps users find the source, report issues, and contribute." >i</span></h5>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Repository URL <span class="info-tip" title="Full URL to the source code repository (e.g., https://github.com/org/repo)." >i</span></label>
+                    <input class="form-control" @bind="repoUrl" placeholder="https://github.com/org/repo" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Source <span class="info-tip" title="Hosting platform of the repository (e.g., GitHub, GitLab, Bitbucket)." >i</span></label>
+                    <select class="form-select" @bind="repoSource">
+                        <option value="">—</option>
+                        <option value="github">GitHub</option>
+                        <option value="gitlab">GitLab</option>
+                        <option value="bitbucket">Bitbucket</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Subfolder <span class="info-tip" title="Path within the repository where this server's code lives. Used when a monorepo contains multiple servers." >i</span></label>
+                    <input class="form-control" @bind="repoSubfolder" placeholder="servers/MyServer" />
+                </div>
+            </div>
+
+            <hr />
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">Packages <span class="info-tip" title="Installable packages for this server. Defines how clients install and run the server locally via package managers (npm, NuGet, PyPI, Docker)." >i</span></h5>
+                <button type="button" class="btn btn-sm btn-outline-primary" @onclick="AddPackage">+ Add Package</button>
+            </div>
+
+            @for (int i = 0; i < packages.Count; i++)
+            {
+                var idx = i;
+                <div class="card mb-2">
+                    <div class="card-body py-2">
+                        <div class="row g-2">
+                            <div class="col-md-2">
+                                <label class="form-label form-label-sm">Registry <span class="info-tip" title="Package manager type: npm (Node.js), nuget (.NET), pypi (Python), or docker (container)." >i</span></label>
+                                <select class="form-select form-select-sm" @bind="packages[idx].RegistryType">
+                                    <option value="npm">npm</option>
+                                    <option value="nuget">NuGet</option>
+                                    <option value="pypi">PyPI</option>
+                                    <option value="docker">Docker</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label form-label-sm">Identifier <span class="info-tip" title="Package name in the registry (e.g., &#64;azure/mcp for npm, Azure.Mcp for NuGet)." >i</span></label>
+                                <input class="form-control form-control-sm" @bind="packages[idx].Identifier" placeholder="@@azure/mcp" />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label form-label-sm">Version <span class="info-tip" title="Package version in the registry. Usually matches the server version but can differ." >i</span></label>
+                                <input class="form-control form-control-sm" @bind="packages[idx].Version" placeholder="1.0.0" />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label form-label-sm">Transport <span class="info-tip" title="Communication protocol: stdio (standard I/O, for local packages), streamable-http (HTTP streaming), or sse (Server-Sent Events)." >i</span></label>
+                                <select class="form-select form-select-sm" @bind="packages[idx].Transport!.Type">
+                                    <option value="stdio">stdio</option>
+                                    <option value="streamable-http">streamable-http</option>
+                                    <option value="sse">sse</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label form-label-sm">Runtime <span class="info-tip" title="Command used to run the package (e.g., npx for npm packages, dotnet for NuGet). Leave empty for default." >i</span></label>
+                                <input class="form-control form-control-sm" @bind="packages[idx].RuntimeHint" placeholder="npx" />
+                            </div>
+                            <div class="col-md-1 d-flex align-items-end">
+                                <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => packages.RemoveAt(idx)">✕</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <hr />
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">Remotes <span class="info-tip" title="Remote endpoints where this server is hosted and accessible over the network. Clients connect directly to these URLs without installing packages." >i</span></h5>
+                <button type="button" class="btn btn-sm btn-outline-primary" @onclick="AddRemote">+ Add Remote</button>
+            </div>
+
+            @for (int i = 0; i < remotes.Count; i++)
+            {
+                var idx = i;
+                <div class="card mb-2">
+                    <div class="card-body py-2">
+                        <div class="row g-2">
+                            <div class="col-md-3">
+                                <label class="form-label form-label-sm">Transport Type <span class="info-tip" title="Protocol for the remote endpoint: streamable-http (recommended, supports bidirectional streaming) or sse (Server-Sent Events, legacy)." >i</span></label>
+                                <select class="form-select form-select-sm" @bind="remotes[idx].Type">
+                                    <option value="streamable-http">streamable-http</option>
+                                    <option value="sse">sse</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label form-label-sm">URL <span class="info-tip" title="Full URL of the remote MCP server endpoint (e.g., https://api.example.com/mcp/)." >i</span></label>
+                                <input class="form-control form-control-sm" @bind="remotes[idx].Url" placeholder="https://api.example.com/mcp/" />
+                            </div>
+                            <div class="col-md-1 d-flex align-items-end">
+                                <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => remotes.RemoveAt(idx)">✕</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (errorMessage is not null)
+            {
+                <div class="alert alert-danger mt-3">@errorMessage</div>
+            }
+
+            @if (successMessage is not null)
+            {
+                <div class="alert alert-success mt-3">@successMessage</div>
+            }
+
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-primary" disabled="@submitting">
+                    @(submitting ? "Adding..." : "Add Server")
+                </button>
+                <a href="/" class="btn btn-secondary">Cancel</a>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private ServerDetail server = new();
+    private List<PackageInfo> packages = [];
+    private List<RemoteInfo> remotes = [];
+    private string repoUrl = "";
+    private string repoSource = "";
+    private string repoSubfolder = "";
+    private bool submitting;
+    private string? errorMessage;
+    private string? successMessage;
+    private List<ServerDetail> templates = [];
+    private string? selectedTemplate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        templates = await Templates.GetTemplatesAsync();
+    }
+
+    private void ApplyTemplate(ServerDetail tmpl)
+    {
+        selectedTemplate = tmpl.Name;
+        server = new ServerDetail
+        {
+            Name = tmpl.Name,
+            Version = tmpl.Version,
+            Title = tmpl.Title,
+            Description = tmpl.Description,
+            WebsiteUrl = tmpl.WebsiteUrl
+        };
+
+        repoUrl = tmpl.Repository?.Url ?? "";
+        repoSource = tmpl.Repository?.Source ?? "";
+        repoSubfolder = tmpl.Repository?.Subfolder ?? "";
+
+        packages = tmpl.Packages?.Select(p => new PackageInfo
+        {
+            RegistryType = p.RegistryType,
+            Identifier = p.Identifier,
+            Version = p.Version,
+            RuntimeHint = p.RuntimeHint,
+            RegistryBaseUrl = p.RegistryBaseUrl,
+            Transport = p.Transport is not null ? new TransportInfo { Type = p.Transport.Type, TransportType = p.Transport.TransportType } : new TransportInfo()
+        }).ToList() ?? [];
+
+        remotes = tmpl.Remotes?.Select(r => new RemoteInfo
+        {
+            Type = r.Type,
+            TransportType = r.TransportType,
+            Url = r.Url
+        }).ToList() ?? [];
+
+        errorMessage = null;
+        successMessage = null;
+    }
+
+    private void ClearTemplate()
+    {
+        selectedTemplate = null;
+        server = new ServerDetail();
+        packages = [];
+        remotes = [];
+        repoUrl = "";
+        repoSource = "";
+        repoSubfolder = "";
+        errorMessage = null;
+        successMessage = null;
+    }
+
+    private void AddPackage()
+    {
+        packages.Add(new PackageInfo { Transport = new TransportInfo() });
+    }
+
+    private void AddRemote()
+    {
+        remotes.Add(new RemoteInfo());
+    }
+
+    private async Task HandleSubmit()
+    {
+        errorMessage = null;
+        successMessage = null;
+
+        if (string.IsNullOrWhiteSpace(server.Name) || !server.Name.Contains('/'))
+        {
+            errorMessage = "Server name must be in format 'domain/name' (e.g., com.example/my-server)";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(server.Version))
+        {
+            errorMessage = "Version is required";
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(repoUrl))
+        {
+            server.Repository = new RepositoryInfo
+            {
+                Url = repoUrl,
+                Source = string.IsNullOrWhiteSpace(repoSource) ? null : repoSource,
+                Subfolder = string.IsNullOrWhiteSpace(repoSubfolder) ? null : repoSubfolder
+            };
+        }
+
+        if (packages.Count > 0)
+        {
+            foreach (var pkg in packages)
+            {
+                if (pkg.Transport is not null)
+                    pkg.Transport.TransportType = pkg.Transport.Type;
+            }
+            server.Packages = packages;
+        }
+
+        if (remotes.Count > 0)
+        {
+            foreach (var remote in remotes)
+                remote.TransportType = remote.Type;
+            server.Remotes = remotes;
+        }
+
+        submitting = true;
+        try
+        {
+            var success = await Api.AddServersAsync([server]);
+            if (success)
+            {
+                successMessage = $"Server {server.Name} v{server.Version} added successfully!";
+                server = new ServerDetail();
+                packages = [];
+                remotes = [];
+                repoUrl = "";
+                repoSource = "";
+                repoSubfolder = "";
+            }
+            else
+            {
+                errorMessage = "Failed to add server. Check the API logs for details.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+        submitting = false;
+    }
+}

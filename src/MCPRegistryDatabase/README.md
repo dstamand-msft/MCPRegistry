@@ -54,12 +54,22 @@ For the full list of supported target platform identifiers and guidance, see the
 
 https://learn.microsoft.com/en-us/sql/tools/sql-database-projects/concepts/target-platform?view=sql-server-ver17&pivots=sq1-command-line
 
-Example DSP values (tooling dependent):
-- `Microsoft.Data.Tools.Schema.Sql.SqlServer2019DatabaseSchemaProvider`
-- `Microsoft.Data.Tools.Schema.Sql.SqlServer2017DatabaseSchemaProvider`
-- `Microsoft.Data.Tools.Schema.Sql.SqlAzureV12DatabaseSchemaProvider`
+Current DSP values documented by Microsoft:
 
-Refer to the link above for the authoritative list and any newer platform identifiers.
+| DSP value | Target platform |
+|---|---|
+| `Microsoft.Data.Tools.Schema.Sql.Sql120DatabaseSchemaProvider` | SQL Server 2014 |
+| `Microsoft.Data.Tools.Schema.Sql.Sql130DatabaseSchemaProvider` | SQL Server 2016 |
+| `Microsoft.Data.Tools.Schema.Sql.Sql140DatabaseSchemaProvider` | SQL Server 2017 |
+| `Microsoft.Data.Tools.Schema.Sql.Sql150DatabaseSchemaProvider` | SQL Server 2019 |
+| `Microsoft.Data.Tools.Schema.Sql.Sql160DatabaseSchemaProvider` | SQL Server 2022 |
+| `Microsoft.Data.Tools.Schema.Sql.SqlAzureV12DatabaseSchemaProvider` | Azure SQL Database |
+| `Microsoft.Data.Tools.Schema.Sql.SqlDbFabricDatabaseSchemaProvider` | SQL database in Fabric / Fabric Mirrored SQL Database (preview) |
+| `Microsoft.Data.Tools.Schema.Sql.SqlDwDatabaseSchemaProvider` | Azure Synapse SQL Pool |
+| `Microsoft.Data.Tools.Schema.Sql.SqlServerlessDatabaseSchemaProvider` | Azure Synapse Serverless SQL Pool |
+| `Microsoft.Data.Tools.Schema.Sql.SqlDwUnifiedDatabaseSchemaProvider` | Fabric Data Warehouse |
+
+Note: this list can change as new tooling and platform versions are released. Always refer to the official Microsoft documentation link above for the latest supported values.
 
 ## CI Recommendations
 

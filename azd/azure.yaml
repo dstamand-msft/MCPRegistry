@@ -1,0 +1,54 @@
+name: mcpregistry
+metadata:
+  template: azd-init
+
+infra:
+  path: ./infra
+
+services:
+  web:
+    project: ../src/MCPRegistry
+    language: dotnet
+    host: containerapp
+    docker:
+      path: ../src/MCPRegistry/Dockerfile
+      # comment this out if you want to have a debug image instead of a release config
+      # buildArgs:
+      #   - BUILD_CONFIGURATION=Debug
+  ui:
+    project: ../src/MCPRegistry.UI
+    language: dotnet
+    host: containerapp
+    docker:
+      path: ../src/MCPRegistry.UI/Dockerfile
+      context: ../
+      # comment this out if you want to have a debug image instead of a release config
+      # buildArgs:
+      #   - BUILD_CONFIGURATION=Debug
+
+hooks:
+  postprovision:
+    posix:
+      shell: sh
+      run: |
+        ./scripts/deploy-db.sh
+        ./scripts/grant-sql-access.sh
+    windows:
+      shell: pwsh
+      run: |
+        ./scripts/deploy-db.ps1
+        ./scripts/grant-sql-access.ps1
+  predeploy:
+    posix:
+      shell: sh
+      run: az acr update --name $(azd env get-value AZURE_CONTAINER_REGISTRY_NAME) --admin-enabled true --output none
+    windows:
+      shell: pwsh
+      run: az acr update --name (azd env get-value AZURE_CONTAINER_REGISTRY_NAME) --admin-enabled true --output none
+  postdeploy:
+    posix:
+      shell: sh
+      run: az acr update --name $(azd env get-value AZURE_CONTAINER_REGISTRY_NAME) --admin-enabled false --output none
+    windows:
+      shell: pwsh
+      run: az acr update --name (azd env get-value AZURE_CONTAINER_REGISTRY_NAME) --admin-enabled false --output none

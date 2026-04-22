@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <UserSecretsId>752178e0-70d9-484f-aaa9-34d4bceb8bcd</UserSecretsId>
+  </PropertyGroup>
+
+  <Target Name="CopySeedData" BeforeTargets="Build;Publish">
+    <Copy SourceFiles="$(ProjectDir)..\..\data\sample-seed-data.json" DestinationFolder="$(ProjectDir)wwwroot" SkipUnchangedFiles="true" Condition="Exists('$(ProjectDir)..\..\data\sample-seed-data.json')" />
+  </Target>
+
+</Project>

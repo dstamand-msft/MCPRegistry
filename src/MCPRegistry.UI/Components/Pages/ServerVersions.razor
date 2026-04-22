@@ -1,0 +1,131 @@
+@page "/servers/{*ServerName}"
+@using MCPRegistry.UI.Services
+@using MCPRegistry.UI.Models
+@inject McpRegistryClient Api
+@rendermode InteractiveServer
+
+<PageTitle>@ServerName — Versions</PageTitle>
+
+<h1>Versions: <code>@ServerName</code></h1>
+
+<a href="/" class="btn btn-outline-secondary btn-sm mb-3">← Back to all servers</a>
+
+@if (loading)
+{
+    <p><em>Loading versions...</em></p>
+}
+else if (errorMessage is not null)
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+else if (versions.Count == 0)
+{
+    <div class="alert alert-warning">No versions found for this server.</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Version</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in versions)
+            {
+                <tr class="@(item.IsDeleted ? "text-muted" : "")">
+                    <td><span class="badge bg-primary">@item.Server.Version</span></td>
+                    <td>@(item.Server.Title ?? "—")</td>
+                    <td>
+                        @if (item.IsDeleted)
+                        {
+                            <span class="badge bg-secondary">deleted</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">active</span>
+                        }
+                    </td>
+                    <td>@(item.Server.Description ?? "—")</td>
+                    <td>
+                        @if (!item.IsDeleted)
+                        {
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => ConfirmDelete(item.Server.Version)">Delete</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (showDeleteConfirm)
+{
+    <div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Delete version <strong>@deleteVersion</strong> of <strong>@ServerName</strong>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CancelDelete">Cancel</button>
+                    <button class="btn btn-danger" @onclick="ExecuteDelete">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string ServerName { get; set; } = "";
+
+    private List<ServerResponseItem> versions = [];
+    private bool loading = true;
+    private string? errorMessage;
+
+    private bool showDeleteConfirm;
+    private string deleteVersion = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadVersions();
+    }
+
+    private async Task LoadVersions()
+    {
+        loading = true;
+        errorMessage = null;
+        try
+        {
+            var result = await Api.GetServerVersionsAsync(ServerName);
+            versions = result.Servers;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to load versions: {ex.Message}";
+        }
+        loading = false;
+    }
+
+    private void ConfirmDelete(string version)
+    {
+        deleteVersion = version;
+        showDeleteConfirm = true;
+    }
+
+    private void CancelDelete() => showDeleteConfirm = false;
+
+    private async Task ExecuteDelete()
+    {
+        showDeleteConfirm = false;
+        await Api.DeleteServerVersionAsync(ServerName, deleteVersion);
+        await LoadVersions();
+    }
+}

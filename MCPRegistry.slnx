@@ -4,8 +4,13 @@
     <File Path="data/sample-seed-data.json" />
     <File Path="README.md" />
   </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/MCPRegistry.Tests/MCPRegistry.Tests.csproj" />
+    <Project Path="src/MCPRegistry.UI.Tests/MCPRegistry.UI.Tests.csproj" />
+    <Project Path="src/MCPRegistry.UI/MCPRegistry.UI.csproj" />
+  </Folder>
   <Project Path="src/MCPRegistry/MCPRegistry.csproj" />
-  <Project Path="src/MCPRegistryDatabase/MCPRegistryDatabase.sqlproj" Id="1d65a068-8c9c-4c77-a6dc-0dfeb32d1b00">
+  <Project Path="src/MCPRegistryDatabase/MCPRegistryDatabase.sqlproj" Id="030468cc-9b32-4170-b03d-be178f46c571">
     <Build />
     <Deploy />
   </Project>

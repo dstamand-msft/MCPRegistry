@@ -40,6 +40,9 @@ bld/
 # Uncomment if you have tasks that create the project's static files in wwwroot
 #wwwroot/
 
+# Copied to wwwroot at build time from data/
+src/MCPRegistry.UI/wwwroot/sample-seed-data.json
+
 # Visual Studio 2017 auto generated files
 Generated\ Files/
 

@@ -13,8 +13,7 @@ public class ServersController : ControllerBase
     private readonly IServerRegistryService _registryService;
     private readonly ILogger<ServersController> _logger;
 
-    // Regex to validate semantic versioning (semver) format
-    // follows Backus–Naur Form Grammar for Valid SemVer Versions (https://semver.org/#backusnaur-form-grammar-for-valid-semver-versions)
+    // Backus-Naur Form Grammar for Valid SemVer Versions (https://semver.org/#backusnaur-form-grammar-for-valid-semver-versions)
     private readonly Regex _versionRegex = new Regex(
         @"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|[0-9A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|[0-9A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -157,7 +156,7 @@ public class ServersController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error listing server versions for {ServerName}", serverName);
+            _logger.LogError(ex, "Error listing server versions for {ServerName}", $"{serverName}");
             return Problem("Internal server error", statusCode: StatusCodes.Status500InternalServerError, title: "Internal server error");
         }
     }
@@ -186,7 +185,7 @@ public class ServersController : ControllerBase
 
             var serverVersion = await _registryService.GetServerVersionAsync(decodedServerName, decodedVersion);
 
-            if (serverVersion == null)
+            if (serverVersion is null)
             {
                 return NotFound("Server not found");
             }
@@ -213,8 +212,8 @@ public class ServersController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting server version {ServerName}@{Version}", serverName, version);
-            return Problem($"Error getting server version {serverName}@{version}", statusCode: StatusCodes.Status500InternalServerError, title: "Internal server error");
+            _logger.LogError(ex, "Error getting server version {ServerName}@{Version}", $"{serverName}", version);
+            return Problem("Internal server error", statusCode: StatusCodes.Status500InternalServerError, title: "Internal server error");
         }
     }
 
@@ -250,7 +249,7 @@ public class ServersController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting server version {ServerName}@{Version}", serverName, version);
+            _logger.LogError(ex, "Error deleting server version {ServerName}@{Version}", $"{serverName}", version);
             return Problem("Failed to delete server version", statusCode: StatusCodes.Status500InternalServerError, title: "Internal server error");
         }
     }

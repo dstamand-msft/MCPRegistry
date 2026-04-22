@@ -103,14 +103,14 @@ The API comes with the following sample servers for testing (see `data/sample-se
 
 2. **Azure DevOps MCP Server** (`com.microsoft/azure-devops-mcp`)
    - Title: Azure DevOps MCP Server
-   - Description: Azure DevOps—work items, repositories, pipelines, test plans, wiki, search, and more.
+   - Description: Azure DevOps-work items, repositories, pipelines, test plans, wiki, search, and more.
    - Version: 2.2.2
    - Website: https://github.com/microsoft/azure-devops-mcp
    - Packages: npm (@azure-devops/mcp)
 
 3. **Microsoft Learn MCP** (`com.microsoft/microsoft-learn-mcp`)
    - Title: Microsoft Learn MCP
-   - Description: Official Microsoft Learn MCP Server – real-time, trusted docs & code samples for AI and LLMs.
+   - Description: Official Microsoft Learn MCP Server - real-time, trusted docs & code samples for AI and LLMs.
    - Version: 1.0.0
    - Website: https://github.com/MicrosoftDocs/mcp
    - Remotes: https://learn.microsoft.com/api/mcp
@@ -188,6 +188,10 @@ You can POST this JSON to the appropriate endpoint (when implemented) or use it 
 - **Data/** - Data access layer, including repository interfaces and implementations
 - **SQLProject/** - Contains the SQL Server database project for schema and migrations
 
+## Developer Guide
+
+For detailed setup instructions, local development workflow, Azure deployment steps, and troubleshooting, see the [Developer Guide](docs/developer-guide.md).
+
 ### Data Store Implementation
 
 The current implementation uses a SQL Server-based data store for server registry persistence. The data access is handled through the `IServerRepository` interface (`MCPRegistry.Data.IServerRepository`), which defines all required operations for managing servers and their versions. The default implementation, `SqlServerServerRepository`, provides a concrete integration with SQL Server.
@@ -210,9 +214,9 @@ As recommended by the [MCP Registry Aggregators documentation](https://github.co
 
 ### Status values
 
-- **`active`** — The server version is available and functioning normally.
-- **`deprecated`** — The server version is no longer recommended for use.
-- **`deleted`** — The server has violated the MCP.IO registry permissive moderation policy (e.g., spam, malware, or illegal content). You may prefer to remove these servers from their your index registry entirely.
+- **`active`** : The server version is available and functioning normally.
+- **`deprecated`** : The server version is no longer recommended for use.
+- **`deleted`** : The server has violated the MCP.IO registry permissive moderation policy (e.g., spam, malware, or illegal content). You may prefer to remove these servers from their your index registry entirely.
 
 ## Notes
 

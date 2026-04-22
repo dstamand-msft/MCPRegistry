@@ -90,8 +90,8 @@ public class SqlServerServerRepository : IServerRepository
         var servers = new List<ServerDetail>();
         foreach (var result in results)
         {
-            ServerDetail server = JsonSerializer.Deserialize<ServerDetail>(result.Value);
-            if (server == null)
+            var server = JsonSerializer.Deserialize<ServerDetail>(result.Value);
+            if (server is null)
             {
                 continue;
             }
@@ -115,8 +115,8 @@ public class SqlServerServerRepository : IServerRepository
         var servers = new List<ServerDetail>();
         foreach (var result in results)
         {
-            ServerDetail server = JsonSerializer.Deserialize<ServerDetail>(result.Value);
-            if (server == null)
+            var server = JsonSerializer.Deserialize<ServerDetail>(result.Value);
+            if (server is null)
             {
                 continue;
             }
@@ -150,15 +150,18 @@ public class SqlServerServerRepository : IServerRepository
 
         var result = await connection.QueryFirstOrDefaultAsync(sql, param);
 
-        if (result != null)
+        if (result is not null)
         {
-            ServerDetail server = JsonSerializer.Deserialize<ServerDetail>(result.Value);
-            server.AddedAt = result.AddedAt;
-            server.UpdatedAt = result.UpdatedAt;
-            server.Status = result.Status;
-            server.IsLatest = result.IsLatest;
+            var server = JsonSerializer.Deserialize<ServerDetail>(result.Value);
+            if (server is not null)
+            {
+                server.AddedAt = result.AddedAt;
+                server.UpdatedAt = result.UpdatedAt;
+                server.Status = result.Status;
+                server.IsLatest = result.IsLatest;
 
-            return server;
+                return server;
+            }
         }
 
         return null;
@@ -189,6 +192,11 @@ public class SqlServerServerRepository : IServerRepository
 
     public async Task AddServerAsync(ServerDetail server)
     {
+        if (server.Status != "active")
+        {
+            throw new Exception("Only active servers can be added.");
+        }
+
         using var connection = CreateConnection();
         
         var jsonData = JsonSerializer.Serialize(server);
@@ -209,10 +217,10 @@ public class SqlServerServerRepository : IServerRepository
             {
                 Name = server.Name,
                 Version = server.Version,
-                Status = "active",
+                Status = server.Status,
                 UpdatedAt = DateTimeOffset.UtcNow,
                 AddedAt = DateTimeOffset.UtcNow,
-                IsLatest = true,
+                IsLatest = server.IsLatest,
                 Value = jsonData
             }, transaction);
 
